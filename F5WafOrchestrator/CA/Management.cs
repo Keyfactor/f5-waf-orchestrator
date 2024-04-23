@@ -1,13 +1,27 @@
-using Keyfactor.Extensions.Orchestrator.F5CloudOrchestrator.Client;
+// Copyright 2023 Keyfactor
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.Client;
 using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Common.Enums;
 using Keyfactor.Orchestrators.Extensions;
 using Microsoft.Extensions.Logging;
 
-namespace Keyfactor.Extensions.Orchestrator.F5CloudOrchestrator.Jobs;
+namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.CA;
 
 [Job("Management")]
-public class Management : F5CloudJob<Management>, IManagementJobExtension
+public class Management : Job<Management>, IManagementJobExtension
 {
     ILogger _logger = LogHandler.GetClassLogger<Management>();
         
@@ -23,7 +37,7 @@ public class Management : F5CloudJob<Management>, IManagementJobExtension
             
             try
             {
-                F5Client = new F5CloudClient(config.CertificateStoreDetails.ClientMachine, config.ServerPassword);
+                F5Client = new F5WafClient(config.CertificateStoreDetails.ClientMachine, config.ServerPassword);
             } catch (Exception ex)
             {
                 _logger.LogError(ex, $"Could not connect to F5 Client" + ex.Message);
@@ -32,13 +46,19 @@ public class Management : F5CloudJob<Management>, IManagementJobExtension
 
             try
             {
+                // check if the string starts with "ca-" and remove it if present
+                if (config.CertificateStoreDetails.StorePath.StartsWith("ca-"))
+                {
+                    config.CertificateStoreDetails.StorePath = config.CertificateStoreDetails.StorePath.Substring(3);  
+                }
+                
                 switch (config.OperationType)
                 {
                     case CertStoreOperationType.Add:
                         _logger.LogDebug("Adding certificate to F5 Cloud");
                         
-                        PerformAddition(config, result);
-                        
+                        PerformCaCertAddition(config, result);
+
                         _logger.LogDebug("Add operation complete.");
                         
                         result.Result = OrchestratorJobStatusJobResult.Success;
@@ -46,7 +66,7 @@ public class Management : F5CloudJob<Management>, IManagementJobExtension
                     case CertStoreOperationType.Remove:
                         _logger.LogDebug("Removing certificate from F5 Cloud");
                         
-                        PerformRemove(config, result);
+                        PerformCaCertRemove(config, result);
                         
                         _logger.LogDebug("Remove operation complete.");
                         
@@ -65,17 +85,30 @@ public class Management : F5CloudJob<Management>, IManagementJobExtension
             return result;
         }
 
-        private void PerformAddition(ManagementJobConfiguration config, JobResult result)
+        private void PerformCaCertRemove(ManagementJobConfiguration config, JobResult result)
         {
-            // Ensure that the certificate is in PKCS#12 format
-            if (string.IsNullOrWhiteSpace(config.JobCertificate.PrivateKeyPassword))
+            try
             {
-                throw new Exception("Certificate must be in PKCS#12 format.");
+                F5Client.RemoveCaCertificate(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias);
             }
-            // Ensure that an alias is provided
+            catch (Exception ex)
+            {
+                _logger.LogDebug($"An error occured while removing {config.JobCertificate.Alias} to {config.CertificateStoreDetails.StorePath}: " + ex.Message);
+                result.FailureMessage = $"An error occured while removing {config.JobCertificate.Alias} to {config.CertificateStoreDetails.StorePath}: " + ex.Message;
+            }
+        }
+        
+        private void PerformCaCertAddition(ManagementJobConfiguration config, JobResult result)
+        {
+            // ensure that an alias is provided
             if (string.IsNullOrWhiteSpace(config.JobCertificate.Alias))
             {
                 throw new Exception("Certificate alias is required.");
+            }
+            // ensure that an alias is provided
+            if (!string.IsNullOrWhiteSpace(config.JobCertificate.PrivateKeyPassword))
+            {
+                throw new Exception("Certificate passed is not a CA.");
             }
             
             if (F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias) && !config.Overwrite)
@@ -88,37 +121,24 @@ public class Management : F5CloudJob<Management>, IManagementJobExtension
             
             try
             {
-                F5CloudClient.PostRoot reqBody = F5Client.FormatCertificateRequest(config.JobCertificate);
+                F5WafClient.CaPostRoot reqBody = F5Client.FormatCaCertificateRequest(config.JobCertificate);
                 if (F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias) &&
                     config.Overwrite)
                 {
                     _logger.LogDebug("Overwrite is enabled, replacing certificate in F5 called \"{0}\"",
                         config.JobCertificate.Alias);
-                    F5Client.ReplaceCertificateInF5(config.CertificateStoreDetails.StorePath, reqBody);
+                    F5Client.ReplaceCaCertificateInF5(config.CertificateStoreDetails.StorePath, reqBody);
                 }
                 else
                 {
                     _logger.LogDebug("Adding certificate to F5 Cloud");
-                    F5Client.CreateCertificateInF5(config.CertificateStoreDetails.StorePath, reqBody);
+                    F5Client.AddCaCertificate(config.CertificateStoreDetails.StorePath, reqBody);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogDebug($"An error occured while adding {config.JobCertificate.Alias} to {config.CertificateStoreDetails.StorePath}: " + ex.Message);
                 result.FailureMessage = $"An error occured while adding {config.JobCertificate.Alias} to {config.CertificateStoreDetails.StorePath}: " + ex.Message;
-            }
-        }
-
-        private void PerformRemove(ManagementJobConfiguration config, JobResult result)
-        {
-            try
-            {
-                F5Client.RemoveCertificate(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogDebug($"An error occured while removing {config.JobCertificate.Alias} to {config.CertificateStoreDetails.StorePath}: " + ex.Message);
-                result.FailureMessage = $"An error occured while removing {config.JobCertificate.Alias} to {config.CertificateStoreDetails.StorePath}: " + ex.Message;
             }
         }
 }

@@ -12,16 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Keyfactor.Extensions.Orchestrator.F5CloudOrchestrator.Client;
-using Keyfactor.Logging;
+using Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.Client;
 using Keyfactor.Orchestrators.Extensions;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
-namespace Keyfactor.Extensions.Orchestrator.F5CloudOrchestrator.Jobs;
+namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator;
 
-public abstract class F5CloudJob<T> : IOrchestratorJobExtension
+public abstract class Job<T> : IOrchestratorJobExtension
 {
-    protected F5CloudClient F5Client { get; set; }
-    public string ExtensionName => "F5Cloud";
+    protected F5WafClient F5Client { get; set; }
+    public string ExtensionName => "F5Waf";
 }

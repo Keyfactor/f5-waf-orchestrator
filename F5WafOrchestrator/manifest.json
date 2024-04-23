@@ -1,0 +1,30 @@
+{
+  "extensions": {
+    "Keyfactor.Orchestrators.Extensions.IOrchestratorJobExtension": {
+      "CertStores.F5WafTls.Inventory": {
+        "assemblypath": "F5WafOrchestrator.dll",
+        "TypeFullName": "Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.TLS.Inventory"
+      },
+      "CertStores.F5WafTls.Management": {
+        "assemblypath": "F5WafOrchestrator.dll",
+        "TypeFullName": "Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.TLS.Management"
+      },
+      "CertStores.F5WafTls.Discovery": {
+        "assemblypath": "F5WafOrchestrator.dll",
+        "TypeFullName": "Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.TLS.Discovery"
+      },
+      "CertStores.F5WafCa.Inventory": {
+        "assemblypath": "F5WafOrchestrator.dll",
+        "TypeFullName": "Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.CA.Inventory"
+      },
+      "CertStores.F5WafCa.Discovery": {
+        "assemblypath": "F5WafOrchestrator.dll",
+        "TypeFullName": "Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.CA.Discovery"
+      },
+      "CertStores.F5WafCa.Management": {
+        "assemblypath": "F5WafOrchestrator.dll",
+        "TypeFullName": "Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.CA.Management"
+      }
+    }
+  }
+}

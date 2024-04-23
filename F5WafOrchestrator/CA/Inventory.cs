@@ -12,19 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Keyfactor.Extensions.Orchestrator.F5CloudOrchestrator.Client;
+using Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.Client;
 using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Common.Enums;
 using Keyfactor.Orchestrators.Extensions;
 using Microsoft.Extensions.Logging;
 
-namespace Keyfactor.Extensions.Orchestrator.F5CloudOrchestrator.Jobs;
+namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.CA;
 
 [Job("Inventory")]
-public class Inventory : F5CloudJob<Inventory>, IInventoryJobExtension
+public class Inventory : Job<Inventory>, IInventoryJobExtension
 {
     private readonly ILogger _logger = LogHandler.GetClassLogger<Inventory>();
 
@@ -40,7 +37,7 @@ public class Inventory : F5CloudJob<Inventory>, IInventoryJobExtension
         
         try
         {
-            F5Client = new F5CloudClient(config.CertificateStoreDetails.ClientMachine, config.ServerPassword);
+            F5Client = new F5WafClient(config.CertificateStoreDetails.ClientMachine, config.ServerPassword);
         } catch (Exception ex)
         {
             _logger.LogError(ex, $"Could not connect to F5 Client" + ex.Message);
@@ -49,10 +46,17 @@ public class Inventory : F5CloudJob<Inventory>, IInventoryJobExtension
         
         
         List<CurrentInventoryItem> inventoryItems;
+        string storePath = config.CertificateStoreDetails.StorePath;
 
         try
         {
-            var (names, certs) = F5Client.GetCertificates(config.CertificateStoreDetails.StorePath);
+            // check if the string starts with "ca-" and remove it if present
+            if (config.CertificateStoreDetails.StorePath.StartsWith("ca-"))
+            {
+                storePath = config.CertificateStoreDetails.StorePath.Substring(3);  // Skip the first 3 characters ("ca-")
+            }
+            
+            var (names, certs) = F5Client.CaCertificateRetrievalProcess(storePath);
             inventoryItems = certs.Zip(names, (certificate, name) => new CurrentInventoryItem
             {
                 Alias = name,
@@ -60,12 +64,12 @@ public class Inventory : F5CloudJob<Inventory>, IInventoryJobExtension
                 PrivateKeyEntry = false,
                 UseChainLevel = false
             }).ToList();
-            _logger.LogDebug($"Found {inventoryItems.Count} certificates in namespace {config.CertificateStoreDetails.StorePath}");
+            _logger.LogDebug($"Found {inventoryItems.Count} certificates in namespace {storePath}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting F5 Certificate from namespace {config.CertificateStoreDetails.StorePath}:\n" + ex.Message);
-            result.FailureMessage = $"Error getting F5 Certificates from namespace {config.CertificateStoreDetails.StorePath}:\n" + ex.Message;
+            _logger.LogError(ex, $"Error getting F5 Certificate from namespace {storePath}:\n" + ex.Message);
+            result.FailureMessage = $"Error getting F5 Certificates from namespace {storePath}:\n" + ex.Message;
             return result;
         }
         

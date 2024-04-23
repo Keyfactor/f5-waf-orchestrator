@@ -4,13 +4,9 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>Keyfactor.Extensions.Orchestrator.F5CloudOrchestrator</RootNamespace>
+        <RootNamespace>Keyfactor.Extensions.Orchestrator.F5WafOrchestrator</RootNamespace>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
-
-    <ItemGroup>
-        <Folder Include="Client" />
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Keyfactor.Logging" Version="1.1.1" />
@@ -28,9 +24,15 @@
         </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="BouncyCastle.Crypto">
+        <HintPath>..\..\..\..\..\..\Program Files\Keyfactor\Keyfactor Orchestrator\BouncyCastle.Crypto.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DefineConstants></DefineConstants>
-        <BaseOutputPath>C:\Program Files\Keyfactor\Keyfactor Orchestrator\extensions\F5CloudOrchestrator</BaseOutputPath>
+        <BaseOutputPath>C:\Program Files\Keyfactor\Keyfactor Orchestrator\extensions\F5WafOrchestrator</BaseOutputPath>
         <OutputPath>$(BaseOutputPath)</OutputPath>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>

@@ -7,6 +7,7 @@
 
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <RootNamespace>F5WafOrchestrator.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -25,7 +26,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\F5CloudOrchestrator\F5CloudOrchestrator.csproj" />
+      <ProjectReference Include="..\F5WafOrchestrator\F5WafOrchestrator.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="BouncyCastle.Crypto">
+        <HintPath>..\..\..\..\..\..\Program Files\Keyfactor\Keyfactor Orchestrator\BouncyCastle.Crypto.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

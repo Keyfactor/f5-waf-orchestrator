@@ -1,15 +1,15 @@
-using Keyfactor.Extensions.Orchestrator.F5CloudOrchestrator.Client;
+using Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.Client;
 using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Common.Enums;
 using Keyfactor.Orchestrators.Extensions;
 using Microsoft.Extensions.Logging;
 
-namespace Keyfactor.Extensions.Orchestrator.F5CloudOrchestrator.Jobs;
+namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.TLS;
 
-[Job("Management")]
-public class Discovery : F5CloudJob<Discovery>, IDiscoveryJobExtension
+[Job("Discovery")]
+public class Discovery : Job<Discovery>, IDiscoveryJobExtension
 {
-    ILogger _logger = LogHandler.GetClassLogger<Management>();
+    ILogger _logger = LogHandler.GetClassLogger<Discovery>();
         
         public JobResult ProcessJob(DiscoveryJobConfiguration config, SubmitDiscoveryUpdate cb)
         {
@@ -20,23 +20,21 @@ public class Discovery : F5CloudJob<Discovery>, IDiscoveryJobExtension
                 Result = OrchestratorJobStatusJobResult.Failure,
                 JobHistoryId = config.JobHistoryId
             };
-        
+
             try
             {
-                F5Client = new F5CloudClient(config.ClientMachine, config.ServerPassword);
+                F5Client = new F5WafClient(config.ClientMachine, config.ServerPassword);
             } catch (Exception ex)
             {
                 _logger.LogError(ex, $"Could not connect to F5 Client" + ex.Message);
                 return result;
             }
-        
-        
+            
             List<string> namespaces;
-            // CertificateStore certificateStore = new CertificateStore() { ClientMachine = config.ClientMachine };
             
             try
             {
-                namespaces = F5Client.DiscoverNamespaces();
+                namespaces = F5Client.DiscoverNamespacesforTlsStoreType();
                 _logger.LogDebug($"Found {namespaces.Count()} namespaces in {config.ClientMachine}");
             }
             catch (Exception ex)
