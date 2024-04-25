@@ -116,8 +116,8 @@ Custom fields operate at the certificate store level and are used to control how
 
 | Name | Display Name | Type | Default Value/Options | Required | Description       |
 | ---- | ------------ | ---- | --------------------- | -------- |-------------------|
-| ServerUsername | Server Username | Secret |  |  | The username used to log in to the F5 Distributed Cloud instance (typically an email). |
-| ServerPassword | Server Password | Secret |  |  | The API Token configured in the F5 Distributed Cloud instance's Account Settings. |
+| ServerUsername | Server Username | Secret |  | &check; | The username used to log in to the F5 Distributed Cloud instance (typically an email). |
+| ServerPassword | Server Password | Secret |  | &check; | The API Token configured in the F5 Distributed Cloud instance's Account Settings. |
 | ServerUseSsl | Use SSL | Bool | true | &check; | Specifies whether SSL should be used for communication with the server. Set to 'true' to enable SSL, and 'false' to disable it. |
 
 
@@ -166,8 +166,8 @@ Custom fields operate at the certificate store level and are used to control how
 
 | Name | Display Name | Type | Default Value/Options | Required | Description       |
 | ---- | ------------ | ---- | --------------------- | -------- |-------------------|
-| ServerUsername | Server Username | Secret |  |  | The username used to log in to the F5 Distributed Cloud instance (typically an email). |
-| ServerPassword | Server Password | Secret |  |  | The API Token configured in the F5 Distributed Cloud instance's Account Settings. |
+| ServerUsername | Server Username | Secret |  | &check; | The username used to log in to the F5 Distributed Cloud instance (typically an email). |
+| ServerPassword | Server Password | Secret |  | &check; | The API Token configured in the F5 Distributed Cloud instance's Account Settings. |
 | ServerUseSsl | Use SSL | Bool | true | &check; | Specifies whether SSL should be used for communication with the server. Set to 'true' to enable SSL, and 'false' to disable it. |
 
 
@@ -181,6 +181,8 @@ After creating the `F5WafTls` and `F5WafCa` Certificate Store Types and installi
 
 The following table describes the required and optional fields for the `F5WafTls` and `F5WafCa` certificate store types.
 
+In Keyfactor Command, navigate to Certificate Stores from the Locations Menu. Click the Add button to create a new Certificate Store using the attributes in the table above.
+
 | Attribute | Description                                                                                                                                    |
 | --------- |------------------------------------------------------------------------------------------------------------------------------------------------|
 | Category | Select either F5WafTls or F5WafCa depending on whether you want to manage TLS certificates or Root CAs.                                        |
@@ -192,5 +194,4 @@ The following table describes the required and optional fields for the `F5WafTls
 | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. |
 | Use SSL | Specifies whether SSL should be used for communication with the server. Set to 'true' to enable SSL, and 'false' to disable it.                |
 
-* In Keyfactor Command, navigate to Certificate Stores from the Locations Menu. Click the Add button to create a new Certificate Store using the attributes in the table above.
 --
