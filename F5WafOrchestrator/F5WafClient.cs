@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 using Keyfactor.Orchestrators.Extensions;
+using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Pkcs;
 
 
@@ -175,7 +176,61 @@ public class F5WafClient
         return stringResponse.Result;
     }
     
-    public string? GetF5TlsCertificateContents(string f5Namespace, string certName)
+    public string GetHttpLoadBalancersFromF5(string f5Namespace)
+    {
+        var response = F5Client.GetAsync($"/api/config/namespaces/{f5Namespace}/http_loadbalancers");
+        response.Wait();
+        var stringResponse = response.Result.Content.ReadAsStringAsync();
+        stringResponse.Wait();
+        
+        //parse status code for error handling
+        string statusCode = string.Empty;
+        string[] respMessage = response.Result.ToString().Split(',');
+        for (int i = 0; i < respMessage.Length; i++)
+        {
+            if (respMessage[i].Contains("StatusCode:"))
+            {
+                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
+                break;
+            }
+        }
+            
+        if (statusCode != "200")
+        {
+            throw new Exception(stringResponse.ToString());
+        }
+        
+        return stringResponse.Result;
+    }
+    
+    public string GetHttpLoadBalancerFromF5(string f5Namespace, string certAlias)
+    {
+        var response = F5Client.GetAsync($"/api/config/namespaces/{f5Namespace}/http_loadbalancers/{certAlias}?response_format=GET_RSP_FORMAT_DEFAULT");
+        response.Wait();
+        var stringResponse = response.Result.Content.ReadAsStringAsync();
+        stringResponse.Wait();
+        
+        // parse status code for error handling
+        string statusCode = string.Empty;
+        string[] respMessage = response.Result.ToString().Split(',');
+        for (int i = 0; i < respMessage.Length; i++)
+        {
+            if (respMessage[i].Contains("StatusCode:"))
+            {
+                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
+                break;
+            }
+        }
+            
+        if (statusCode != "200")
+        {
+            throw new Exception(stringResponse.ToString());
+        }
+        
+        return stringResponse.Result;
+    }
+    
+    public string? GetTlsCertificateContentsFromF5(string f5Namespace, string certName)
     {
         var response = F5Client.GetAsync($"/api/config/namespaces/{f5Namespace}/certificates/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
         response.Wait();
@@ -254,7 +309,7 @@ public class F5WafClient
                     string? name = nameElement.GetString();
                     if (name != null)
                     {
-                        string? certString = GetF5TlsCertificateContents(f5Namespace, name);
+                        string? certString = GetTlsCertificateContentsFromF5(f5Namespace, name);
                         if (certString?.StartsWith("string:///") ?? false)
                         {
                             // remove the "string:///" part
@@ -776,5 +831,49 @@ public class F5WafClient
         }
         
         return namespacesList;
+    }
+    
+    public bool JobCertIsAttachedToHttpLoadBalancer(string f5Namespace, string jobCertName)
+    {
+        var certsJson = GetHttpLoadBalancersFromF5(f5Namespace);
+        var certs = JsonDocument.Parse(certsJson);
+        var items = certs.RootElement.GetProperty("items").EnumerateArray();
+            
+        // iterate through each cert in "items" JSON object
+        foreach (var item in items)
+        {
+            if (item.TryGetProperty("name", out JsonElement nameElement))
+            {
+                string? name = nameElement.GetString();
+                if (name != null)
+                {
+                    string lbJson = GetHttpLoadBalancerFromF5(f5Namespace, name);
+                    
+                    JObject jsonResponse = JObject.Parse(lbJson);
+
+                    // navigate to the 'https' object and then to 'tls_cert_params' -> 'certificates'
+                    JToken? httpsSection = jsonResponse["spec"]?["https"]?["tls_cert_params"]?["certificates"];
+
+                    if (httpsSection != null && httpsSection.Any())
+                    {
+                        foreach (JToken certificateToken in httpsSection)
+                        {
+                            JObject? certificate = certificateToken as JObject;
+
+                            // check to see if job cert name matches certs tied to load balancer
+                            if (certificate != null)
+                            {
+                                string certificateName = certificate["name"].ToString();
+                                if (certificateName == jobCertName)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

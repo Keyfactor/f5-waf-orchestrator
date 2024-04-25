@@ -1,9 +1,11 @@
 using System.Security.Cryptography.X509Certificates;
+using Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.Client;
 using Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.TLS;
 using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Common.Enums;
 using Keyfactor.Orchestrators.Extensions;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using NLog.Extensions.Logging;
 using Org.BouncyCastle.Pkcs;
 
@@ -82,12 +84,12 @@ public class F5WafTls
             },
             ServerPassword = "Q8pcZGz89EqhcUfzWsuFVE/L0Ps=",
             OperationType = CertStoreOperationType.Add,
-            Overwrite = true,
+            Overwrite = false,
             JobCertificate = new ManagementJobCertificate
             {
                 Thumbprint = null,
                 Contents = pfxBase64,
-                Alias = "unittest333",
+                Alias = "unittest555",
                 PrivateKeyPassword = password
             }
         };
@@ -125,7 +127,7 @@ public class F5WafTls
             {
                 Thumbprint = null,
                 Contents = base64EncodedPfx,
-                Alias = "test111",
+                Alias = "commonName",
                 PrivateKeyPassword = "jzYBiWjRBEtV"
             }
         };
@@ -169,92 +171,5 @@ public class F5WafTls
         // Assert
         Assert.Equal(OrchestratorJobStatusJobResult.Success, result.Result);
     }
-    
-    // [Fact]
-    // public void F5WafOrchestrator_TLS_ManagementAddChain_IntegrationTest_ReturnSuccess()
-    // {
-    //     byte[] pemFileBytes = File.ReadAllBytes("C:\\Users\\asmith\\Downloads\\EJBCAEnroll_xunit.pem");
-    //
-    //     string base64EncodedPem = Convert.ToBase64String(pemFileBytes);
-    //
-    //     var config = new ManagementJobConfiguration
-    //     
-    //     {
-    //         CertificateStoreDetails = new CertificateStore
-    //         {
-    //             ClientMachine = "keyfactor.console.ves.volterra.io",
-    //             StorePath = "sgdemonamespace",
-    //             StorePassword = "",
-    //             Properties =
-    //                 "{\"ServerUsername\":\"aspen.smith@keyfactor.com\",\"ServerPassword\":\"8i/rSASoUEfu/0yru2nQ4ly7Tdk=\",\"ServerUseSsl\":\"true\"}",
-    //             Type = 0
-    //         },
-    //         ServerPassword = "Q8pcZGz89EqhcUfzWsuFVE/L0Ps=",
-    //         OperationType = CertStoreOperationType.Add,
-    //         Overwrite = true,
-    //         JobCertificate = new ManagementJobCertificate
-    //         {
-    //             Thumbprint = null,
-    //             Contents = base64EncodedPem,
-    //             Alias = "unittest12",
-    //             PrivateKeyPassword = null
-    //         }
-    //     };
-    //
-    //     var management = new Management();
-    //
-    //     var result = management.ProcessJob(config);
-    //     
-    //     // Assert
-    //     Assert.Equal(OrchestratorJobStatusJobResult.Success, result.Result);
-    // }
-
-    // [Fact]
-    // public void F5WafOrchestrator_GetChain_ManagementJobReturnTest_ReturnTrue()
-    // {
-    //     bool result = true;
-    //     // PFX enrolled ManagementJobCertificate.RawData contents
-    //     string base64EncodedPfx = File.ReadAllText("C:\\Users\\asmith\\OneDrive - Keyfactor\\Desktop\\ManagementJobCertificateContentsRawData.txt");
-    //     string password = "6fuErUrnnQxM";
-    //     
-    //     // convert the base64 string to a byte array
-    //     byte[] pfxData = Convert.FromBase64String(base64EncodedPfx);
-    //     
-    //     // load the PFX certificate contents 
-    //     var certificate = new X509Certificate2(pfxData, password, X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet);
-    //
-    //     // init a certificate chain
-    //     var chain = new X509Chain();
-    //
-    //     // disable chain policy checks for the sake of testing
-    //     chain.ChainPolicy = new X509ChainPolicy
-    //     {
-    //         RevocationMode = X509RevocationMode.NoCheck, // Disable revocation check
-    //         VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority // Allow certificates from unknown authorities
-    //     };
-    //
-    //     // build chain from the certificate contents
-    //     bool chainBuilt = chain.Build(certificate);
-    //     if (!chainBuilt)
-    //     { 
-    //         Console.WriteLine($"Error creating chain.");
-    //         result = false;
-    //     }
-    //
-    //     int count = 0;
-    //     // enumerate and print chain elements
-    //     Console.WriteLine("Certificate Chain:");
-    //     foreach (X509ChainElement element in chain.ChainElements)
-    //     {
-    //         count += 1;
-    //     }
-    //
-    //     if (count > 1)
-    //     {
-    //         result = true;
-    //     }
-    //     
-    //     Assert.True(result);
-    // }
 
 }

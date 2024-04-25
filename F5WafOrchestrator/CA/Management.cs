@@ -66,8 +66,8 @@ public class Management : Job<Management>, IManagementJobExtension
                     case CertStoreOperationType.Remove:
                         _logger.LogDebug("Removing certificate from F5 Cloud");
                         
-                        PerformCaCertRemove(config, result);
-                        
+                        F5Client.RemoveCaCertificate(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias);
+
                         _logger.LogDebug("Remove operation complete.");
                         
                         result.Result = OrchestratorJobStatusJobResult.Success;
@@ -80,22 +80,10 @@ public class Management : Job<Management>, IManagementJobExtension
             {
                 _logger.LogError(ex, "Error processing job:\n {0}", ex.Message);
                 result.FailureMessage = ex.Message;
+                return result;
             }
 
             return result;
-        }
-
-        private void PerformCaCertRemove(ManagementJobConfiguration config, JobResult result)
-        {
-            try
-            {
-                F5Client.RemoveCaCertificate(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogDebug($"An error occured while removing {config.JobCertificate.Alias} to {config.CertificateStoreDetails.StorePath}: " + ex.Message);
-                result.FailureMessage = $"An error occured while removing {config.JobCertificate.Alias} to {config.CertificateStoreDetails.StorePath}: " + ex.Message;
-            }
         }
         
         private void PerformCaCertAddition(ManagementJobConfiguration config, JobResult result)
@@ -119,26 +107,18 @@ public class Management : Job<Management>, IManagementJobExtension
                 throw new Exception(message);
             }
             
-            try
+            F5WafClient.CaPostRoot reqBody = F5Client.FormatCaCertificateRequest(config.JobCertificate);
+            if (F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias) &&
+                config.Overwrite)
             {
-                F5WafClient.CaPostRoot reqBody = F5Client.FormatCaCertificateRequest(config.JobCertificate);
-                if (F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias) &&
-                    config.Overwrite)
-                {
-                    _logger.LogDebug("Overwrite is enabled, replacing certificate in F5 called \"{0}\"",
-                        config.JobCertificate.Alias);
-                    F5Client.ReplaceCaCertificateInF5(config.CertificateStoreDetails.StorePath, reqBody);
-                }
-                else
-                {
-                    _logger.LogDebug("Adding certificate to F5 Cloud");
-                    F5Client.AddCaCertificate(config.CertificateStoreDetails.StorePath, reqBody);
-                }
+                _logger.LogDebug("Overwrite is enabled, replacing certificate in F5 called \"{0}\"",
+                    config.JobCertificate.Alias);
+                F5Client.ReplaceCaCertificateInF5(config.CertificateStoreDetails.StorePath, reqBody);
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogDebug($"An error occured while adding {config.JobCertificate.Alias} to {config.CertificateStoreDetails.StorePath}: " + ex.Message);
-                result.FailureMessage = $"An error occured while adding {config.JobCertificate.Alias} to {config.CertificateStoreDetails.StorePath}: " + ex.Message;
+                _logger.LogDebug("Adding certificate to F5 Cloud");
+                F5Client.AddCaCertificate(config.CertificateStoreDetails.StorePath, reqBody);
             }
         }
 }
