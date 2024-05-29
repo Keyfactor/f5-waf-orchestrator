@@ -20,8 +20,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.TLS;
 
-[Job("Management")]
-public class Management : Job<Management>, IManagementJobExtension
+public class Management : Job, IManagementJobExtension
 {
     ILogger _logger = LogHandler.GetClassLogger<Management>();
 

@@ -20,8 +20,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.TLS;
 
-[Job("Inventory")]
-public class Inventory : Job<Inventory>, IInventoryJobExtension
+public class Inventory : Job, IInventoryJobExtension
 {
     private readonly ILogger _logger = LogHandler.GetClassLogger<Inventory>();
 

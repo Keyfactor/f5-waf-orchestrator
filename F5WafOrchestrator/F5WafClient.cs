@@ -425,7 +425,11 @@ public class F5WafClient
         string endEntityandChain = "";
         
         byte[] pfxBytes = Convert.FromBase64String(pfxData);
-        Pkcs12Store store = new Pkcs12Store(new MemoryStream(pfxBytes), password.ToCharArray());
+
+        Pkcs12StoreBuilder storeBuilder = new Pkcs12StoreBuilder();
+        Pkcs12Store store = storeBuilder.Build();
+        store.Load(new MemoryStream(pfxBytes), password.ToCharArray());
+
         foreach (string alias in store.Aliases)
         {
             if (store.IsKeyEntry(alias))

@@ -17,7 +17,7 @@ using Keyfactor.Orchestrators.Extensions;
 
 namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator;
 
-public abstract class Job<T> : IOrchestratorJobExtension
+public abstract class Job
 {
     protected F5WafClient F5Client { get; set; }
     public string ExtensionName => "F5Waf";

@@ -6,8 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.TLS;
 
-[Job("Discovery")]
-public class Discovery : Job<Discovery>, IDiscoveryJobExtension
+public class Discovery : Job, IDiscoveryJobExtension
 {
     ILogger _logger = LogHandler.GetClassLogger<Discovery>();
         
