@@ -1,4 +1,4 @@
-// Copyright 2023 Keyfactor
+// Copyright 2024 Keyfactor
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,5 +20,5 @@ namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator;
 public abstract class Job
 {
     protected F5WafClient F5Client { get; set; }
-    public string ExtensionName => "F5Waf";
+    public string ExtensionName => "";
 }
