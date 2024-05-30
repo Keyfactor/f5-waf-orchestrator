@@ -58,7 +58,7 @@ public class Inventory : Job, IInventoryJobExtension
             {
                 Alias = name,
                 Certificates = new List<string> { certificate },
-                PrivateKeyEntry = false,
+                PrivateKeyEntry = true,
                 UseChainLevel = false
             }).ToList();
             _logger.LogDebug($"Found {inventoryItems.Count} certificates in namespace {storePath}");
