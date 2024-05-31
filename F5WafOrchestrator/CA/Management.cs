@@ -24,100 +24,75 @@ public class Management : Job, IManagementJobExtension
 {
     ILogger _logger = LogHandler.GetClassLogger<Management>();
         
-        public JobResult ProcessJob(ManagementJobConfiguration config)
-        {
-            _logger.LogDebug("Beginning F5 Cloud Management Job");
-
-            JobResult result = new JobResult
-            {
-                Result = OrchestratorJobStatusJobResult.Failure,
-                JobHistoryId = config.JobHistoryId
-            };
+    public JobResult ProcessJob(ManagementJobConfiguration config)
+    {
+        _logger.LogDebug($"Begin {config.Capability} for job id {config.JobId}...");
+        _logger.LogDebug($"Server: {config.CertificateStoreDetails.ClientMachine}");
+        _logger.LogDebug($"Store Path: {config.CertificateStoreDetails.StorePath}");
             
-            try
-            {
-                F5Client = new F5WafClient(config.CertificateStoreDetails.ClientMachine, config.ServerPassword);
-            } catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Could not connect to F5 Client" + ex.Message);
-                return result;
-            }
+        try
+        {
+            F5Client = new F5WafClient(config.CertificateStoreDetails.ClientMachine, config.ServerPassword);
 
-            try
+            // check if the string starts with "ca-" and remove it if present.  This may occur
+            //   if store was created in Command via a Discovery job
+            if (config.CertificateStoreDetails.StorePath.StartsWith("ca-"))
             {
-                // check if the string starts with "ca-" and remove it if present
-                if (config.CertificateStoreDetails.StorePath.StartsWith("ca-"))
-                {
-                    config.CertificateStoreDetails.StorePath = config.CertificateStoreDetails.StorePath.Substring(3);  
-                }
+                config.CertificateStoreDetails.StorePath = config.CertificateStoreDetails.StorePath.Substring(3);  
+            }
                 
-                switch (config.OperationType)
-                {
-                    case CertStoreOperationType.Add:
-                        _logger.LogDebug("Adding certificate to F5 Cloud");
-                        
-                        PerformCaCertAddition(config, result);
-
-                        _logger.LogDebug("Add operation complete.");
-                        
-                        result.Result = OrchestratorJobStatusJobResult.Success;
-                        break;
-                    case CertStoreOperationType.Remove:
-                        _logger.LogDebug("Removing certificate from F5 Cloud");
-                        
-                        F5Client.RemoveCaCertificate(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias);
-
-                        _logger.LogDebug("Remove operation complete.");
-                        
-                        result.Result = OrchestratorJobStatusJobResult.Success;
-                        break;
-                    default:
-                        _logger.LogDebug("Invalid management operation type: {0}", config.OperationType);
-                        throw new ArgumentOutOfRangeException();
-                }
-            } catch (Exception ex)
+            switch (config.OperationType)
             {
-                _logger.LogError(ex, "Error processing job:\n {0}", ex.Message);
-                result.FailureMessage = ex.Message;
-                return result;
+                case CertStoreOperationType.Add:
+                    _logger.LogDebug($"BEGIN Add Operation for {config.CertificateStoreDetails.StorePath} on {config.CertificateStoreDetails.ClientMachine}.");
+                    PerformCaCertAddition(config);
+                    _logger.LogDebug($"END Add Operation for {config.CertificateStoreDetails.StorePath} on {config.CertificateStoreDetails.ClientMachine}.");
+                    break;
+                case CertStoreOperationType.Remove:
+                    _logger.LogDebug($"BEGIN Delete Operation for {config.CertificateStoreDetails.StorePath} on {config.CertificateStoreDetails.ClientMachine}.");
+                    F5Client.RemoveCaCertificate(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias);
+                    _logger.LogDebug($"END Delete Operation for {config.CertificateStoreDetails.StorePath} on {config.CertificateStoreDetails.ClientMachine}.");
+                    break;
+                default:
+                    return new JobResult() { Result = OrchestratorJobStatusJobResult.Failure, JobHistoryId = config.JobHistoryId, FailureMessage = $"Site {config.CertificateStoreDetails.StorePath} on server {config.CertificateStoreDetails.ClientMachine}: Unsupported operation: {config.OperationType.ToString()}" };
             }
-
-            return result;
-        }
-        
-        private void PerformCaCertAddition(ManagementJobConfiguration config, JobResult result)
+        } 
+        catch (Exception ex)
         {
-            // ensure that an alias is provided
-            if (string.IsNullOrWhiteSpace(config.JobCertificate.Alias))
-            {
-                throw new Exception("Certificate alias is required.");
-            }
-            // ensure that an alias is provided
-            if (!string.IsNullOrWhiteSpace(config.JobCertificate.PrivateKeyPassword))
-            {
-                throw new Exception("Certificate passed is not a CA.");
-            }
-            
-            if (F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias) && !config.Overwrite)
-            {
-                string message =
-                    $"Certificate with alias \"{config.JobCertificate.Alias}\" already exists in F5, and job was not configured to overwrite.";
-                _logger.LogDebug(message);
-                throw new Exception(message);
-            }
-            
-            F5WafClient.CaPostRoot reqBody = F5Client.FormatCaCertificateRequest(config.JobCertificate);
-            if (F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias) &&
-                config.Overwrite)
-            {
-                _logger.LogDebug("Overwrite is enabled, replacing certificate in F5 called \"{0}\"",
-                    config.JobCertificate.Alias);
-                F5Client.ReplaceCaCertificateInF5(config.CertificateStoreDetails.StorePath, reqBody);
-            }
-            else
-            {
-                _logger.LogDebug("Adding certificate to F5 Cloud");
-                F5Client.AddCaCertificate(config.CertificateStoreDetails.StorePath, reqBody);
-            }
+            _logger.LogError($"Exception for {config.Capability}: {F5WAFException.FlattenExceptionMessages(ex, string.Empty)} for job id {config.JobId}");
+            return new JobResult() { Result = OrchestratorJobStatusJobResult.Failure, JobHistoryId = config.JobHistoryId, FailureMessage = F5WAFException.FlattenExceptionMessages(ex, $"Site {config.CertificateStoreDetails.StorePath} on server {config.CertificateStoreDetails.ClientMachine}:") };
         }
+
+        _logger.LogDebug($"...End {config.Capability} job for job id {config.JobId}");
+        return new JobResult() { Result = OrchestratorJobStatusJobResult.Success, JobHistoryId = config.JobHistoryId };
+    }
+
+    private void PerformCaCertAddition(ManagementJobConfiguration config)
+    {
+        _logger.MethodEntry(LogLevel.Debug);
+            
+        if (F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias) && !config.Overwrite)
+        {
+            string message =
+                $"Certificate with alias \"{config.JobCertificate.Alias}\" already exists in F5, and job was not configured to overwrite.";
+            _logger.LogDebug(message);
+            throw new Exception(message);
+        }
+            
+        F5WafClient.CaPostRoot reqBody = F5Client.FormatCaCertificateRequest(config.JobCertificate);
+        if (F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias) &&
+            config.Overwrite)
+        {
+            _logger.LogDebug("Overwrite is enabled, replacing certificate in F5 called \"{0}\"",
+                config.JobCertificate.Alias);
+            F5Client.ReplaceCaCertificateInF5(config.CertificateStoreDetails.StorePath, reqBody);
+        }
+        else
+        {
+            _logger.LogDebug("Adding certificate to F5 Cloud");
+            F5Client.AddCaCertificate(config.CertificateStoreDetails.StorePath, reqBody);
+        }
+
+        _logger.MethodExit(LogLevel.Debug);
+    }
 }

@@ -48,7 +48,7 @@
             "StoreRequired": false,
             "Style": "Default"
           },
-          "PrivateKeyAllowed": "Optional",
+          "PrivateKeyAllowed": "Required",
           "JobProperties": [],
           "ServerRequired": true,
           "PowerShell": false,
