@@ -11,7 +11,7 @@ namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator
 {
     class F5WAFException : ApplicationException
     {
-        public F5WAFException(string message) : base(message)
+        public F5WAFException(string? message) : base(message)
         { }
 
         public F5WAFException(string message, Exception ex) : base(message, ex)
