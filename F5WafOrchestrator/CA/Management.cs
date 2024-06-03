@@ -50,7 +50,7 @@ public class Management : Job, IManagementJobExtension
                     break;
                 case CertStoreOperationType.Remove:
                     _logger.LogDebug($"BEGIN Delete Operation for {config.CertificateStoreDetails.StorePath} on {config.CertificateStoreDetails.ClientMachine}.");
-                    F5Client.RemoveCaCertificate(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias);
+                    F5Client.RemoveCaOrTlsCertificate(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias, false);
                     _logger.LogDebug($"END Delete Operation for {config.CertificateStoreDetails.StorePath} on {config.CertificateStoreDetails.ClientMachine}.");
                     break;
                 default:

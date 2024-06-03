@@ -78,7 +78,7 @@ public class Management : Job, IManagementJobExtension
                 "The job cert is bound to an http load balancer. Must unbind before performing management job.");
         }
 
-        F5Client.RemoveTlsCertificate(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias);
+        F5Client.RemoveCaOrTlsCertificate(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias, true);
 
         _logger.MethodExit(LogLevel.Debug);
     }

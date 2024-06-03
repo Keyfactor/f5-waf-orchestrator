@@ -502,42 +502,13 @@ public class F5WafClient
         return reqBody;
     }
 
-    public void RemoveTlsCertificate(string f5Namespace, string certName)
+    public void RemoveCaOrTlsCertificate(string f5Namespace, string certName, bool isTLSCertificate)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var response = F5Client.DeleteAsync($"/api/config/namespaces/{f5Namespace}/certificates/{certName}");
-        response.Wait();
-        var stringResponse = response.Result.Content.ReadAsStringAsync();
-        stringResponse.Wait();
-        
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            var errorMessage = response.Result.Content.ReadAsStringAsync();
-            errorMessage.Wait();
-            throw new F5WAFException(errorMessage.ToString());
-        }
+        string certType = isTLSCertificate ? "certificates" : "trusted_ca_lists";
 
-        _logger.MethodExit(LogLevel.Debug);
-    }
-
-    public void RemoveCaCertificate(string f5Namespace, string certName)
-    {
-        _logger.MethodEntry(LogLevel.Debug);
-
-        var response = F5Client.DeleteAsync($"/api/config/namespaces/{f5Namespace}/trusted_ca_lists/{certName}");
+        var response = F5Client.DeleteAsync($"/api/config/namespaces/{f5Namespace}/{certType}/{certName}");
         response.Wait();
         var stringResponse = response.Result.Content.ReadAsStringAsync();
         stringResponse.Wait();
@@ -776,6 +747,8 @@ public class F5WafClient
 
     private string SubmitGetRequest(string endpoint)
     {
+        _logger.MethodEntry(LogLevel.Debug);
+
         var response = F5Client.GetAsync(endpoint).Result;
         var result = response.Content.ReadAsStringAsync().Result;
 
@@ -789,6 +762,8 @@ public class F5WafClient
             _logger.MethodExit(LogLevel.Debug);
             throw new F5WAFException(errorMessage);
         }
+
+        _logger.MethodExit(LogLevel.Debug);
 
         return result;
     }
