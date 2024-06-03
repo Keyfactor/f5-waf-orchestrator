@@ -23,43 +23,30 @@ namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.CA;
 public class Discovery : Job, IDiscoveryJobExtension
 {
     ILogger _logger = LogHandler.GetClassLogger<Discovery>();
-        
-        public JobResult ProcessJob(DiscoveryJobConfiguration config, SubmitDiscoveryUpdate cb)
-        {
-            _logger.LogDebug("Beginning F5 Distributed Cloud Discovery Job");
-        
-            var result = new JobResult
-            {
-                Result = OrchestratorJobStatusJobResult.Failure,
-                JobHistoryId = config.JobHistoryId
-            };
-        
-            try
-            {
-                F5Client = new F5WafClient(config.ClientMachine, config.ServerPassword);
-            } catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Could not connect to F5 Client" + ex.Message);
-                return result;
-            }
-            
-            List<string> namespaces;
-            
-            try
-            {
-                namespaces = F5Client.DiscoverNamespacesforCaStoreType();
-                _logger.LogDebug($"Found {namespaces.Count()} namespaces in {config.ClientMachine}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error getting F5 namespaces from {config.ClientMachine}:\n" + ex.Message);
-                result.FailureMessage = $"Error getting F5 namespaces from {config.ClientMachine}:\n" + ex.Message;
-                return result;
-            }
-            
-            cb.Invoke(namespaces);
 
-            result.Result = OrchestratorJobStatusJobResult.Success;
-            return result;
+    public JobResult ProcessJob(DiscoveryJobConfiguration config, SubmitDiscoveryUpdate cb)
+    {
+        _logger.LogDebug($"Begin {config.Capability} for job id {config.JobId}...");
+        _logger.LogDebug($"Server: {config.ClientMachine}");
+
+        List<string> namespaces;
+
+        try
+        {
+            F5Client = new F5WafClient(config.ClientMachine, config.ServerPassword);
+
+            namespaces = F5Client.DiscoverNamespacesforCaStoreType();
+            _logger.LogDebug($"Found {namespaces.Count()} namespaces in {config.ClientMachine}");
         }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception for {config.Capability}: {F5WAFException.FlattenExceptionMessages(ex, string.Empty)} for job id {config.JobId}");
+            return new JobResult() { Result = OrchestratorJobStatusJobResult.Failure, JobHistoryId = config.JobHistoryId, FailureMessage = F5WAFException.FlattenExceptionMessages(ex, $"Server {config.ClientMachine}:") };
+        }
+
+        cb.Invoke(namespaces);
+
+        _logger.LogDebug($"...End {config.Capability} job for job id {config.JobId}");
+        return new JobResult() { Result = OrchestratorJobStatusJobResult.Success, JobHistoryId = config.JobHistoryId };
+    }
 }
