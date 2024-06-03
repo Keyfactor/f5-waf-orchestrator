@@ -331,7 +331,38 @@ public class F5WafClient
 
         return rootObject.spec?.trusted_ca_url;
     }
-    
+
+    public string GetNamespaces()
+    {
+        _logger.MethodEntry(LogLevel.Debug);
+
+        var response = F5Client.GetAsync($"/api/web/namespaces");
+        response.Wait();
+        var resp = response.Result.Content.ReadAsStringAsync();
+        resp.Wait();
+
+        //parse status code for error handling
+        string statusCode = string.Empty;
+        string[] respMessage = response.Result.ToString().Split(',');
+        for (int i = 0; i < respMessage.Length; i++)
+        {
+            if (respMessage[i].Contains("StatusCode:"))
+            {
+                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
+                break;
+            }
+        }
+
+        if (statusCode != "200")
+        {
+            throw new F5WAFException($"Error retrieving F5 certificate contents: {resp}");
+        }
+
+        _logger.MethodExit(LogLevel.Debug);
+
+        return resp.Result;
+    }
+
     public (IEnumerable<string>, IEnumerable<string>) TlsCertificateRetrievalProcess(string f5Namespace)
     {
         _logger.MethodEntry(LogLevel.Debug);
@@ -430,87 +461,6 @@ public class F5WafClient
         _logger.MethodExit(LogLevel.Debug);
 
         return (certNames, encodedCerts);
-    }
-
-    private string ConvertCertToPemFormat(string base64EncodedCertificate)
-    {
-        _logger.MethodEntry(LogLevel.Debug);
-
-        StringBuilder builder = new StringBuilder();
-
-        builder.Append("-----BEGIN CERTIFICATE-----\n");
-
-        // split base64 string into 64-character lines
-        for (int i = 0; i < base64EncodedCertificate.Length; i += 64)
-        {
-            int lineLength = Math.Min(64, base64EncodedCertificate.Length - i);
-            string line = base64EncodedCertificate.Substring(i, lineLength);
-            builder.Append(line + "\n"); 
-        }
-
-        builder.Append("-----END CERTIFICATE-----\n");
-
-        _logger.MethodExit(LogLevel.Debug);
-
-        return builder.ToString();
-    }
-    
-    private string ConvertKeyToPemFormat(string base64EncodedCertificate)
-    {
-        _logger.MethodEntry(LogLevel.Debug);
-
-        StringBuilder builder = new StringBuilder();
-
-        builder.Append("-----BEGIN RSA PRIVATE KEY-----\n");
-
-        // split base64 string into 64-character lines
-        for (int i = 0; i < base64EncodedCertificate.Length; i += 64)
-        {
-            int lineLength = Math.Min(64, base64EncodedCertificate.Length - i);
-            string line = base64EncodedCertificate.Substring(i, lineLength);
-            builder.Append(line + "\n"); 
-        }
-
-        builder.Append("-----END RSA PRIVATE KEY-----\n");
-
-        _logger.MethodExit(LogLevel.Debug);
-
-        return builder.ToString();
-    }
-
-    public string ExtractEndEntityandCertChain(string pfxData, string password)
-    {
-        _logger.MethodEntry(LogLevel.Debug);
-
-        string endEntityandChain = "";
-        
-        byte[] pfxBytes = Convert.FromBase64String(pfxData);
-
-        Pkcs12StoreBuilder storeBuilder = new Pkcs12StoreBuilder();
-        Pkcs12Store store = storeBuilder.Build();
-        store.Load(new MemoryStream(pfxBytes), password.ToCharArray());
-
-        foreach (string alias in store.Aliases)
-        {
-            if (store.IsKeyEntry(alias))
-            {
-                X509CertificateEntry[] chain = store.GetCertificateChain(alias);
-                if (chain == null)
-                {
-                    throw new F5WAFException("No certificate chain found or no key entry exists.");
-                }
-                string[] pemCertificates = new string[chain.Length];
-                for (int i = 0; i < chain.Length; i++)
-                {
-                    pemCertificates[i] = ConvertCertToPemFormat(Convert.ToBase64String(chain[i].Certificate.GetEncoded()));
-                    endEntityandChain += pemCertificates[i];
-                }
-            }
-        }
-
-        _logger.MethodExit(LogLevel.Debug);
-
-        return endEntityandChain;
     }
 
     public void AddTlsCertificate(string f5Namespace, PostRoot reqBody)
@@ -838,37 +788,6 @@ public class F5WafClient
 
         _logger.MethodExit(LogLevel.Debug);
     }
-
-    public string GetNamespaces()
-    {
-        _logger.MethodEntry(LogLevel.Debug);
-
-        var response = F5Client.GetAsync($"/api/web/namespaces");
-        response.Wait();
-        var resp = response.Result.Content.ReadAsStringAsync();
-        resp.Wait();
-
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            throw new F5WAFException($"Error retrieving F5 certificate contents: {resp}");
-        }
-
-        _logger.MethodExit(LogLevel.Debug);
-
-        return resp.Result;
-    }
     
     public List<string> DiscoverNamespacesforCaStoreType()
     {
@@ -997,5 +916,86 @@ public class F5WafClient
         _logger.MethodExit(LogLevel.Debug);
 
         return false;
+    }
+
+    private string ExtractEndEntityandCertChain(string pfxData, string password)
+    {
+        _logger.MethodEntry(LogLevel.Debug);
+
+        string endEntityandChain = "";
+
+        byte[] pfxBytes = Convert.FromBase64String(pfxData);
+
+        Pkcs12StoreBuilder storeBuilder = new Pkcs12StoreBuilder();
+        Pkcs12Store store = storeBuilder.Build();
+        store.Load(new MemoryStream(pfxBytes), password.ToCharArray());
+
+        foreach (string alias in store.Aliases)
+        {
+            if (store.IsKeyEntry(alias))
+            {
+                X509CertificateEntry[] chain = store.GetCertificateChain(alias);
+                if (chain == null)
+                {
+                    throw new F5WAFException("No certificate chain found or no key entry exists.");
+                }
+                string[] pemCertificates = new string[chain.Length];
+                for (int i = 0; i < chain.Length; i++)
+                {
+                    pemCertificates[i] = ConvertCertToPemFormat(Convert.ToBase64String(chain[i].Certificate.GetEncoded()));
+                    endEntityandChain += pemCertificates[i];
+                }
+            }
+        }
+
+        _logger.MethodExit(LogLevel.Debug);
+
+        return endEntityandChain;
+    }
+
+    private string ConvertCertToPemFormat(string base64EncodedCertificate)
+    {
+        _logger.MethodEntry(LogLevel.Debug);
+
+        StringBuilder builder = new StringBuilder();
+
+        builder.Append("-----BEGIN CERTIFICATE-----\n");
+
+        // split base64 string into 64-character lines
+        for (int i = 0; i < base64EncodedCertificate.Length; i += 64)
+        {
+            int lineLength = Math.Min(64, base64EncodedCertificate.Length - i);
+            string line = base64EncodedCertificate.Substring(i, lineLength);
+            builder.Append(line + "\n");
+        }
+
+        builder.Append("-----END CERTIFICATE-----\n");
+
+        _logger.MethodExit(LogLevel.Debug);
+
+        return builder.ToString();
+    }
+
+    private string ConvertKeyToPemFormat(string base64EncodedCertificate)
+    {
+        _logger.MethodEntry(LogLevel.Debug);
+
+        StringBuilder builder = new StringBuilder();
+
+        builder.Append("-----BEGIN RSA PRIVATE KEY-----\n");
+
+        // split base64 string into 64-character lines
+        for (int i = 0; i < base64EncodedCertificate.Length; i += 64)
+        {
+            int lineLength = Math.Min(64, base64EncodedCertificate.Length - i);
+            string line = base64EncodedCertificate.Substring(i, lineLength);
+            builder.Append(line + "\n");
+        }
+
+        builder.Append("-----END RSA PRIVATE KEY-----\n");
+
+        _logger.MethodExit(LogLevel.Debug);
+
+        return builder.ToString();
     }
 }
