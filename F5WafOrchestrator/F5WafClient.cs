@@ -23,7 +23,9 @@ using System.Text.Json.Serialization;
 using Keyfactor.Orchestrators.Extensions;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Pkcs;
-
+using System.Net;
+using Org.BouncyCastle.Asn1.Ocsp;
+using System.Xml.Linq;
 
 namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.Client;
 
@@ -144,223 +146,77 @@ public class F5WafClient
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var response = F5Client.GetAsync($"/api/config/namespaces/{f5Namespace}/certificates");
-        response.Wait();
-        var stringResponse = response.Result.Content.ReadAsStringAsync();
-        stringResponse.Wait();
-        
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            throw new F5WAFException(stringResponse.ToString());
-        }
+        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/certificates");
 
         _logger.MethodExit(LogLevel.Debug);
 
-        return stringResponse.Result;
+        return result;
     }
     
     public string GetCaCertificatesFromF5(string f5Namespace)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var response = F5Client.GetAsync($"/api/config/namespaces/{f5Namespace}/trusted_ca_lists");
-        response.Wait();
-        var stringResponse = response.Result.Content.ReadAsStringAsync();
-        stringResponse.Wait();
-        
-        // parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            throw new F5WAFException(stringResponse.ToString());
-        }
+        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/trusted_ca_lists");
 
         _logger.MethodExit(LogLevel.Debug);
 
-        return stringResponse.Result;
+        return result;
     }
     
     public string GetHttpLoadBalancersFromF5(string f5Namespace)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var response = F5Client.GetAsync($"/api/config/namespaces/{f5Namespace}/http_loadbalancers");
-        response.Wait();
-        var stringResponse = response.Result.Content.ReadAsStringAsync();
-        stringResponse.Wait();
-        
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            throw new F5WAFException(stringResponse.ToString());
-        }
+        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/http_loadbalancers");
 
         _logger.MethodExit(LogLevel.Debug);
 
-        return stringResponse.Result;
+        return result;
     }
     
     public string GetHttpLoadBalancerFromF5(string f5Namespace, string certAlias)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var response = F5Client.GetAsync($"/api/config/namespaces/{f5Namespace}/http_loadbalancers/{certAlias}?response_format=GET_RSP_FORMAT_DEFAULT");
-        response.Wait();
-        var stringResponse = response.Result.Content.ReadAsStringAsync();
-        stringResponse.Wait();
-        
-        // parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            throw new F5WAFException(stringResponse.ToString());
-        }
+        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/http_loadbalancers/{certAlias}?response_format=GET_RSP_FORMAT_DEFAULT");
 
         _logger.MethodExit(LogLevel.Debug);
 
-        return stringResponse.Result;
+        return result;
     }
     
     public string? GetTlsCertificateContentsFromF5(string f5Namespace, string certName)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var response = F5Client.GetAsync($"/api/config/namespaces/{f5Namespace}/certificates/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
-        response.Wait();
-        var resp = response.Result.Content.ReadAsStringAsync();
-        resp.Wait();
-
-        // parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            throw new F5WAFException($"Error retrieving F5 certificate contents: {resp}");
-        }
-        
-        RootObject rootObject = JsonSerializer.Deserialize<RootObject>(resp.Result)
-                                 ?? throw new InvalidOperationException("Deserialized RootObject is null.");
+        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/certificates/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
 
         _logger.MethodExit(LogLevel.Debug);
 
-        return rootObject.spec?.certificate_url;
+        return result;
     }
     
     public string? GetCaCertificateContentsFromF5(string f5Namespace, string certName)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var response = F5Client.GetAsync($"/api/config/namespaces/{f5Namespace}/trusted_ca_lists/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
-        response.Wait();
-        var resp = response.Result.Content.ReadAsStringAsync();
-        resp.Wait();
-
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            throw new F5WAFException($"Error retrieving F5 certificate contents: {resp}");
-        }
-        
-        CaRootObject rootObject = JsonSerializer.Deserialize<CaRootObject>(resp.Result)
-                                ?? throw new InvalidOperationException("Deserialized RootObject is null.");
+        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/trusted_ca_lists/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
 
         _logger.MethodExit(LogLevel.Debug);
 
-        return rootObject.spec?.trusted_ca_url;
+        return result;
     }
 
     public string GetNamespaces()
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var response = F5Client.GetAsync($"/api/web/namespaces");
-        response.Wait();
-        var resp = response.Result.Content.ReadAsStringAsync();
-        resp.Wait();
-
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-
-        if (statusCode != "200")
-        {
-            throw new F5WAFException($"Error retrieving F5 certificate contents: {resp}");
-        }
+        string result = SubmitGetRequest($"/api/web/namespaces");
 
         _logger.MethodExit(LogLevel.Debug);
 
-        return resp.Result;
+        return result;
     }
 
     public (IEnumerable<string>, IEnumerable<string>) TlsCertificateRetrievalProcess(string f5Namespace)
@@ -916,6 +772,25 @@ public class F5WafClient
         _logger.MethodExit(LogLevel.Debug);
 
         return false;
+    }
+
+    private string SubmitGetRequest(string endpoint)
+    {
+        var response = F5Client.GetAsync(endpoint).Result;
+        var result = response.Content.ReadAsStringAsync().Result;
+
+        if (response.StatusCode != HttpStatusCode.OK &&
+            response.StatusCode != HttpStatusCode.Accepted &&
+            response.StatusCode != HttpStatusCode.Created &&
+            response.StatusCode != HttpStatusCode.NoContent)
+        {
+            string errorMessage = $"Error calling {endpoint}: {result}";
+            _logger.LogError(errorMessage);
+            _logger.MethodExit(LogLevel.Debug);
+            throw new F5WAFException(errorMessage);
+        }
+
+        return result;
     }
 
     private string ExtractEndEntityandCertChain(string pfxData, string password)
