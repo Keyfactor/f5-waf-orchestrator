@@ -29,103 +29,103 @@ using System.Xml.Linq;
 
 namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.Client;
 
-public class F5WafClient
+internal class F5WafClient
 {
-    public class Spec
+    internal class Spec
     {
-        public string? certificate_url { get; set; }
+        internal string? certificate_url { get; set; }
     }
     
-    public class RootObject
+    internal class RootObject
     {
-        public Spec? spec { get; set; }
+        internal Spec? spec { get; set; }
     }
     
-    public struct PostRoot
+    internal struct PostRoot
     {
         [JsonPropertyName("metadata")]
-        public Metadata Metadata { get; set; }
+        internal Metadata Metadata { get; set; }
     
         [JsonPropertyName("spec")]
-        public PostSpec Spec { get; set; }
+        internal PostSpec Spec { get; set; }
     }
 
-    public struct Metadata
+    internal struct Metadata
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        internal string Name { get; set; }
 
         [JsonPropertyName("disable")]
-        public bool Disable { get; set; }
+        internal bool Disable { get; set; }
     }
 
-    public struct PostSpec
+    internal struct PostSpec
     {
         [JsonPropertyName("certificate_url")]
-        public string certificate_url { get; set; }
+        internal string certificate_url { get; set; }
 
         [JsonPropertyName("private_key")]
-        public PrivateKey PrivateKey { get; set; }
+        internal PrivateKey PrivateKey { get; set; }
 
         [JsonPropertyName("disable_ocsp_stapling")]
-        public DisableOcspStapling DisableOcspStapling { get; set; }
+        internal DisableOcspStapling DisableOcspStapling { get; set; }
     }
 
-    public struct PrivateKey
+    internal struct PrivateKey
     {
         [JsonPropertyName("clear_secret_info")]
-        public ClearSecretInfo ClearSecretInfo { get; set; }
+        internal ClearSecretInfo ClearSecretInfo { get; set; }
     }
 
-    public struct ClearSecretInfo
+    internal struct ClearSecretInfo
     {
         [JsonPropertyName("url")]
-        public string Location { get; set; }
+        internal string Location { get; set; }
     }
     
-    public struct DisableOcspStapling
+    internal struct DisableOcspStapling
     {
     }
     
-    public struct PostChainRoot
+    internal struct PostChainRoot
     {
         [JsonPropertyName("metadata")]
-        public Metadata Metadata { get; set; }
+        internal Metadata Metadata { get; set; }
     
         [JsonPropertyName("spec")]
-        public PostChainSpec Spec { get; set; }
+        internal PostChainSpec Spec { get; set; }
     }
     
-    public struct PostChainSpec
+    internal struct PostChainSpec
     {
         [JsonPropertyName("certificate_url")]
-        public string certificate_url { get; set; }
+        internal string certificate_url { get; set; }
     }
     
-    public struct CaPostRoot
+    internal struct CaPostRoot
     {
         [JsonPropertyName("metadata")]
-        public Metadata Metadata { get; set; }
+        internal Metadata Metadata { get; set; }
     
         [JsonPropertyName("spec")]
-        public CaSpec Spec { get; set; }
+        internal CaSpec Spec { get; set; }
     }
     
-    public class CaSpec
+    internal class CaSpec
     {
-        public string? trusted_ca_url { get; set; }
+        internal string? trusted_ca_url { get; set; }
     }
     
-    public class CaRootObject
+    internal class CaRootObject
     {
-        public CaSpec? spec { get; set; }
+        internal CaSpec? spec { get; set; }
     }
 
     private HttpClient F5Client { get; }
 
     private ILogger _logger { get; }
 
-    public F5WafClient(string hostname, string apiToken)
+    internal F5WafClient(string hostname, string apiToken)
     {
         _logger = LogHandler.GetClassLogger<F5WafClient>();
         _logger.MethodEntry(LogLevel.Debug);
@@ -142,10 +142,10 @@ public class F5WafClient
         _logger.MethodExit(LogLevel.Debug);
     }
 
-    public string GetTlsCertificatesFromF5(string f5Namespace)
+    internal string GetTlsCertificatesFromF5(string f5Namespace)
     {
         _logger.MethodEntry(LogLevel.Debug);
-
+        HttpRequestMessage m = new HttpRequestMessage(decimal,)
         string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/certificates");
 
         _logger.MethodExit(LogLevel.Debug);
@@ -153,7 +153,7 @@ public class F5WafClient
         return result;
     }
     
-    public string GetCaCertificatesFromF5(string f5Namespace)
+    internal string GetCaCertificatesFromF5(string f5Namespace)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -164,9 +164,11 @@ public class F5WafClient
         return result;
     }
     
-    public string GetHttpLoadBalancersFromF5(string f5Namespace)
+    internal string GetHttpLoadBalancersFromF5(string f5Namespace)
     {
         _logger.MethodEntry(LogLevel.Debug);
+
+        HttpRequestMessage request = new HttpRequestMessage() { }
 
         string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/http_loadbalancers");
 
@@ -175,7 +177,7 @@ public class F5WafClient
         return result;
     }
     
-    public string GetHttpLoadBalancerFromF5(string f5Namespace, string certAlias)
+    internal string GetHttpLoadBalancerFromF5(string f5Namespace, string certAlias)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -186,7 +188,7 @@ public class F5WafClient
         return result;
     }
     
-    public string? GetTlsCertificateContentsFromF5(string f5Namespace, string certName)
+    internal string? GetTlsCertificateContentsFromF5(string f5Namespace, string certName)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -197,7 +199,7 @@ public class F5WafClient
         return result;
     }
     
-    public string? GetCaCertificateContentsFromF5(string f5Namespace, string certName)
+    internal string? GetCaCertificateContentsFromF5(string f5Namespace, string certName)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -208,7 +210,7 @@ public class F5WafClient
         return result;
     }
 
-    public string GetNamespaces()
+    internal string GetNamespaces()
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -219,7 +221,7 @@ public class F5WafClient
         return result;
     }
 
-    public (IEnumerable<string>, IEnumerable<string>) TlsCertificateRetrievalProcess(string f5Namespace)
+    internal (IEnumerable<string>, IEnumerable<string>) TlsCertificateRetrievalProcess(string f5Namespace)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -269,7 +271,7 @@ public class F5WafClient
         return (certNames, encodedCerts);
     }
     
-    public (IEnumerable<string>, IEnumerable<string>) CaCertificateRetrievalProcess(string f5Namespace)
+    internal (IEnumerable<string>, IEnumerable<string>) CaCertificateRetrievalProcess(string f5Namespace)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -319,7 +321,7 @@ public class F5WafClient
         return (certNames, encodedCerts);
     }
 
-    public void AddTlsCertificate(string f5Namespace, PostRoot reqBody)
+    internal void AddTlsCertificate(string f5Namespace, PostRoot reqBody)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -351,7 +353,7 @@ public class F5WafClient
         _logger.MethodExit(LogLevel.Debug);
     }
 
-    public void AddCaCertificate(string f5Namespace, CaPostRoot reqBody)
+    internal void AddCaCertificate(string f5Namespace, CaPostRoot reqBody)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -383,7 +385,7 @@ public class F5WafClient
         _logger.MethodExit(LogLevel.Debug);
     }
 
-    public PostRoot FormatTlsCertificateRequest(ManagementJobCertificate mgmtJobCert)
+    internal PostRoot FormatTlsCertificateRequest(ManagementJobCertificate mgmtJobCert)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -457,7 +459,7 @@ public class F5WafClient
         return reqBody;
     }
     
-    public CaPostRoot FormatCaCertificateRequest(ManagementJobCertificate mgmtJobCert)
+    internal CaPostRoot FormatCaCertificateRequest(ManagementJobCertificate mgmtJobCert)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -502,40 +504,30 @@ public class F5WafClient
         return reqBody;
     }
 
-    public void RemoveCaOrTlsCertificate(string f5Namespace, string certName, bool isTLSCertificate)
+    internal void RemoveCaOrTlsCertificate(string f5Namespace, string certName, bool isTLSCertificate)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
         string certType = isTLSCertificate ? "certificates" : "trusted_ca_lists";
 
-        var response = F5Client.DeleteAsync($"/api/config/namespaces/{f5Namespace}/{certType}/{certName}");
-        response.Wait();
-        var stringResponse = response.Result.Content.ReadAsStringAsync();
-        stringResponse.Wait();
-        
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
+        string endpoint = $"/api/config/namespaces/{f5Namespace}/{certType}/{certName}";
+        var response = F5Client.DeleteAsync(endpoint).Result;
+
+        if (response.StatusCode != HttpStatusCode.OK &&
+            response.StatusCode != HttpStatusCode.Accepted &&
+            response.StatusCode != HttpStatusCode.Created &&
+            response.StatusCode != HttpStatusCode.NoContent)
         {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            var errorMessage = response.Result.Content.ReadAsStringAsync();
-            errorMessage.Wait();
-            throw new F5WAFException(errorMessage.ToString());
+            string errorMessage = $"Error calling {endpoint}: {result}";
+            _logger.LogError(errorMessage);
+            _logger.MethodExit(LogLevel.Debug);
+            throw new F5WAFException(errorMessage);
         }
 
         _logger.MethodExit(LogLevel.Debug);
     }
 
-    public bool CertificateExistsInF5(string f5Namespace, string alias)
+    internal bool CertificateExistsInF5(string f5Namespace, string alias)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -552,7 +544,7 @@ public class F5WafClient
                          nameElement.GetString() == alias);
     }
     
-    public void ReplaceTlsCertificate(string f5Namespace, PostRoot reqBody)
+    internal void ReplaceTlsCertificate(string f5Namespace, PostRoot reqBody)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -584,7 +576,7 @@ public class F5WafClient
         _logger.MethodExit(LogLevel.Debug);
     }
 
-    public void ReplaceCaCertificateInF5(string f5Namespace, CaPostRoot reqBody)
+    internal void ReplaceCaCertificateInF5(string f5Namespace, CaPostRoot reqBody)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -616,7 +608,7 @@ public class F5WafClient
         _logger.MethodExit(LogLevel.Debug);
     }
     
-    public List<string> DiscoverNamespacesforCaStoreType()
+    internal List<string> DiscoverNamespacesforCaStoreType()
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -656,7 +648,7 @@ public class F5WafClient
         return namespacesList;
     }
     
-    public List<string> DiscoverNamespacesforTlsStoreType()
+    internal List<string> DiscoverNamespacesforTlsStoreType()
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -696,7 +688,7 @@ public class F5WafClient
         return namespacesList;
     }
     
-    public bool JobCertIsAttachedToHttpLoadBalancer(string f5Namespace, string jobCertName)
+    internal bool JobCertIsAttachedToHttpLoadBalancer(string f5Namespace, string jobCertName)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -745,11 +737,11 @@ public class F5WafClient
         return false;
     }
 
-    private string SubmitGetRequest(string endpoint)
+    private string SubmitGetRequest(HttpRequestMessage request)
     {
         _logger.MethodEntry(LogLevel.Debug);
-
-        var response = F5Client.GetAsync(endpoint).Result;
+        
+        var response = F5Client.SendAsync(request).Result;
         var result = response.Content.ReadAsStringAsync().Result;
 
         if (response.StatusCode != HttpStatusCode.OK &&
@@ -757,7 +749,7 @@ public class F5WafClient
             response.StatusCode != HttpStatusCode.Created &&
             response.StatusCode != HttpStatusCode.NoContent)
         {
-            string errorMessage = $"Error calling {endpoint}: {result}";
+            string errorMessage = $"Error calling {request.RequestUri}: {result}";
             _logger.LogError(errorMessage);
             _logger.MethodExit(LogLevel.Debug);
             throw new F5WAFException(errorMessage);
