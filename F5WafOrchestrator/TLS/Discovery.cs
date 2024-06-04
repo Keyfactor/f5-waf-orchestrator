@@ -35,7 +35,7 @@ public class Discovery : Job, IDiscoveryJobExtension
         {
             F5Client = new F5WafClient(config.ClientMachine, config.ServerPassword);
             
-            namespaces = F5Client.DiscoverNamespacesforTlsStoreType();
+            namespaces = F5Client.DiscoverNamespacesforStoreType("tls-");
             _logger.LogDebug($"Found {namespaces.Count()} namespaces in {config.ClientMachine}");
         }
         catch (Exception ex)

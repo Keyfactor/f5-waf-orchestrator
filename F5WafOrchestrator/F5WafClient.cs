@@ -121,6 +121,8 @@ internal class F5WafClient
         internal CaSpec? spec { get; set; }
     }
 
+    private string HostName { get; set; }
+
     private HttpClient F5Client { get; }
 
     private ILogger _logger { get; }
@@ -130,14 +132,11 @@ internal class F5WafClient
         _logger = LogHandler.GetClassLogger<F5WafClient>();
         _logger.MethodEntry(LogLevel.Debug);
         _logger.LogDebug("Initializing F5 Distributed Cloud client");
+
+        HostName = "https://" + hostname;
         
-        var f5ClientHandler = new HttpClientHandler();
-        
-        F5Client = new HttpClient(f5ClientHandler);
-        F5Client.BaseAddress = new Uri("https://" + hostname);
-        
-        var auth = $"APIToken {apiToken}";
-        F5Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Authorization", auth);
+        F5Client = new HttpClient(new HttpClientHandler());
+        F5Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Authorization", $"APIToken {apiToken}");
 
         _logger.MethodExit(LogLevel.Debug);
     }
@@ -145,8 +144,9 @@ internal class F5WafClient
     internal string GetTlsCertificatesFromF5(string f5Namespace)
     {
         _logger.MethodEntry(LogLevel.Debug);
-        HttpRequestMessage m = new HttpRequestMessage(decimal,)
-        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/certificates");
+
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{HostName}/api/config/namespaces/{f5Namespace}/certificates");
+        string result = SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
 
@@ -157,7 +157,8 @@ internal class F5WafClient
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/trusted_ca_lists");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{HostName}/api/config/namespaces/{f5Namespace}/trusted_ca_lists");
+        string result = SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
 
@@ -168,9 +169,8 @@ internal class F5WafClient
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        HttpRequestMessage request = new HttpRequestMessage() { }
-
-        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/http_loadbalancers");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{HostName}/api/config/namespaces/{f5Namespace}/http_loadbalancers");
+        string result = SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
 
@@ -181,7 +181,8 @@ internal class F5WafClient
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/http_loadbalancers/{certAlias}?response_format=GET_RSP_FORMAT_DEFAULT");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{HostName}/api/config/namespaces/{f5Namespace}/http_loadbalancers/{certAlias}?response_format=GET_RSP_FORMAT_DEFAULT");
+        string result = SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
 
@@ -192,7 +193,8 @@ internal class F5WafClient
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/certificates/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{HostName}/api/config/namespaces/{f5Namespace}/certificates/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
+        string result = SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
 
@@ -203,7 +205,8 @@ internal class F5WafClient
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        string result = SubmitGetRequest($"/api/config/namespaces/{f5Namespace}/trusted_ca_lists/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{HostName}/api/config/namespaces/{f5Namespace}/trusted_ca_lists/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
+        string result = SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
 
@@ -214,7 +217,8 @@ internal class F5WafClient
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        string result = SubmitGetRequest($"/api/web/namespaces");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{HostName}/api/web/namespaces");
+        string result = SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
 
@@ -321,66 +325,25 @@ internal class F5WafClient
         return (certNames, encodedCerts);
     }
 
-    internal void AddTlsCertificate(string f5Namespace, PostRoot reqBody)
+    internal void AddCaOrTlsCertificate(string f5Namespace, PostRoot? tlsReqBody, CaPostRoot? caReqBody, bool isTLSCertificate)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var jsonReqBody = JsonSerializer.Serialize(reqBody);
+        string certType = "trusted_ca_lists";
+        var jsonReqBody = JsonSerializer.Serialize(caReqBody);
+
+        if (isTLSCertificate)
+        {
+            certType = "certificates";
+            jsonReqBody = JsonSerializer.Serialize(tlsReqBody);
+        }
+
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{HostName}/api/config/namespaces/{f5Namespace}/{isTLSCertificate}");
+        
         var stringReqBody = new StringContent(jsonReqBody, Encoding.UTF8, "application/json");
-
-        var response = F5Client.PostAsync($"/api/config/namespaces/{f5Namespace}/certificates", stringReqBody);
-        response.Wait();
-
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            var errorMessage = response.Result.Content.ReadAsStringAsync();
-            errorMessage.Wait();
-            throw new F5WAFException(errorMessage.ToString());
-        }
-
-        _logger.MethodExit(LogLevel.Debug);
-    }
-
-    internal void AddCaCertificate(string f5Namespace, CaPostRoot reqBody)
-    {
-        _logger.MethodEntry(LogLevel.Debug);
-
-        var jsonReqBody = JsonSerializer.Serialize(reqBody);
-        var stringReqBody = new StringContent(jsonReqBody, Encoding.UTF8, "application/json");
-
-        var response = F5Client.PostAsync($"/api/config/namespaces/{f5Namespace}/trusted_ca_lists", stringReqBody);
-        response.Wait();
-
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            var errorMessage = response.Result.Content.ReadAsStringAsync();
-            errorMessage.Wait();
-            throw new F5WAFException(errorMessage.ToString());
-        }
+        request.Content = stringReqBody;
+        
+        SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
     }
@@ -509,20 +472,8 @@ internal class F5WafClient
         _logger.MethodEntry(LogLevel.Debug);
 
         string certType = isTLSCertificate ? "certificates" : "trusted_ca_lists";
-
-        string endpoint = $"/api/config/namespaces/{f5Namespace}/{certType}/{certName}";
-        var response = F5Client.DeleteAsync(endpoint).Result;
-
-        if (response.StatusCode != HttpStatusCode.OK &&
-            response.StatusCode != HttpStatusCode.Accepted &&
-            response.StatusCode != HttpStatusCode.Created &&
-            response.StatusCode != HttpStatusCode.NoContent)
-        {
-            string errorMessage = $"Error calling {endpoint}: {result}";
-            _logger.LogError(errorMessage);
-            _logger.MethodExit(LogLevel.Debug);
-            throw new F5WAFException(errorMessage);
-        }
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, $"{HostName}/api/config/namespaces/{f5Namespace}/{isTLSCertificate}");
+        string result = SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
     }
@@ -544,71 +495,32 @@ internal class F5WafClient
                          nameElement.GetString() == alias);
     }
     
-    internal void ReplaceTlsCertificate(string f5Namespace, PostRoot reqBody)
+    internal void ReplaceCaOrTlsCertificate(string f5Namespace, PostRoot? tlsReqBody, CaPostRoot? caReqBody, bool isTLSCertificate)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var jsonReqBody = JsonSerializer.Serialize(reqBody);
+        string certType = "trusted_ca_lists";
+        string? metadataName = caReqBody?.Metadata.Name;
+        var jsonReqBody = JsonSerializer.Serialize(caReqBody);
+
+        if (isTLSCertificate)
+        {
+            certType = "certificates";
+            metadataName = tlsReqBody?.Metadata.Name;
+            jsonReqBody = JsonSerializer.Serialize(tlsReqBody);
+        }
+
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, $"{HostName}/api/config/namespaces/{f5Namespace}/{certType}/{metadataName}");
+
         var stringReqBody = new StringContent(jsonReqBody, Encoding.UTF8, "application/json");
+        request.Content = stringReqBody;
 
-        var response = F5Client.PutAsync($"/api/config/namespaces/{f5Namespace}/certificates/{reqBody.Metadata.Name}", stringReqBody);
-        response.Wait();
-
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            var errorMessage = response.Result.Content.ReadAsStringAsync();
-            errorMessage.Wait();
-            throw new F5WAFException(errorMessage.ToString());
-        }
-
-        _logger.MethodExit(LogLevel.Debug);
-    }
-
-    internal void ReplaceCaCertificateInF5(string f5Namespace, CaPostRoot reqBody)
-    {
-        _logger.MethodEntry(LogLevel.Debug);
-
-        var jsonReqBody = JsonSerializer.Serialize(reqBody);
-        var stringReqBody = new StringContent(jsonReqBody, Encoding.UTF8, "application/json");
-
-        var response = F5Client.PutAsync($"/api/config/namespaces/{f5Namespace}/trusted_ca_lists/{reqBody.Metadata.Name}", stringReqBody);
-        response.Wait();
-
-        //parse status code for error handling
-        string statusCode = string.Empty;
-        string[] respMessage = response.Result.ToString().Split(',');
-        for (int i = 0; i < respMessage.Length; i++)
-        {
-            if (respMessage[i].Contains("StatusCode:"))
-            {
-                statusCode = respMessage[i].Trim().Substring("StatsCode: ".Length).Trim();
-                break;
-            }
-        }
-            
-        if (statusCode != "200")
-        {
-            var errorMessage = response.Result.Content.ReadAsStringAsync();
-            errorMessage.Wait();
-            throw new F5WAFException(errorMessage.ToString());
-        }
+        SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
     }
     
-    internal List<string> DiscoverNamespacesforCaStoreType()
+    internal List<string> DiscoverNamespacesforStoreType(string storeTypePrefix)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
@@ -628,51 +540,7 @@ internal class F5WafClient
                     string? name = nameElement.GetString();
                     if (name != null)
                     {
-                        namespacesList.Add("ca-" + name);
-                    }
-                    else
-                    {
-                        _logger.LogDebug($"No namespaces found in F5.");
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug($"Error retrieving F5 namespaces: {ex.Message}");
-            throw new F5WAFException($"Error retrieving F5 namespaces: {ex.Message}");
-        }
-
-        _logger.MethodExit(LogLevel.Debug);
-
-        return namespacesList;
-    }
-    
-    internal List<string> DiscoverNamespacesforTlsStoreType()
-    {
-        _logger.MethodEntry(LogLevel.Debug);
-
-        List<string> namespacesList = new List<string>();
-        try
-        {
-            var namespacesJson = GetNamespaces();
-            var namespaces = JsonDocument.Parse(namespacesJson);
-            
-            var items = namespaces.RootElement.GetProperty("items").EnumerateArray();
-            
-            // Iterate through each cert in "items" JSON object
-            foreach (var item in items)
-            {
-                if (item.TryGetProperty("name", out JsonElement nameElement))
-                {
-                    string? name = nameElement.GetString();
-                    if (name != null)
-                    {
-                        namespacesList.Add("tls-" + name);
-                    }
-                    else
-                    {
-                        _logger.LogDebug($"No namespaces found in F5.");
+                        namespacesList.Add(storeTypePrefix + name);
                     }
                 }
             }
@@ -720,7 +588,7 @@ internal class F5WafClient
                             // check to see if job cert name matches certs tied to load balancer
                             if (certificate != null)
                             {
-                                string certificateName = certificate["name"].ToString();
+                                string? certificateName = certificate["name"]?.ToString();
                                 if (certificateName == jobCertName)
                                 {
                                     return true;
@@ -737,7 +605,7 @@ internal class F5WafClient
         return false;
     }
 
-    private string SubmitGetRequest(HttpRequestMessage request)
+    private string SubmitRequest(HttpRequestMessage request)
     {
         _logger.MethodEntry(LogLevel.Debug);
         

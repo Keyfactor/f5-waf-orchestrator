@@ -102,12 +102,12 @@ public class Management : Job, IManagementJobExtension
         {
             _logger.LogDebug("Overwrite is enabled, replacing certificate in F5 called \"{0}\"",
                 config.JobCertificate.Alias);
-            F5Client.ReplaceTlsCertificate(config.CertificateStoreDetails.StorePath, reqBody);
+            F5Client.ReplaceCaOrTlsCertificate(config.CertificateStoreDetails.StorePath, reqBody, null, true);
         }
         else
         {
             _logger.LogDebug("Adding certificate to F5 Cloud");
-            F5Client.AddTlsCertificate(config.CertificateStoreDetails.StorePath, reqBody);
+            F5Client.AddCaOrTlsCertificate(config.CertificateStoreDetails.StorePath, reqBody, null, true);
         }
 
         _logger.MethodExit(LogLevel.Debug);

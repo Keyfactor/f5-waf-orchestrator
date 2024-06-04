@@ -35,7 +35,7 @@ public class Discovery : Job, IDiscoveryJobExtension
         {
             F5Client = new F5WafClient(config.ClientMachine, config.ServerPassword);
 
-            namespaces = F5Client.DiscoverNamespacesforCaStoreType();
+            namespaces = F5Client.DiscoverNamespacesforStoreType("ca-");
             _logger.LogDebug($"Found {namespaces.Count()} namespaces in {config.ClientMachine}");
         }
         catch (Exception ex)
