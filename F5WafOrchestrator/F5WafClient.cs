@@ -29,96 +29,96 @@ using System.Xml.Linq;
 
 namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.Client;
 
-internal class F5WafClient
+public class F5WafClient
 {
-    internal class Spec
+    public class Spec
     {
-        internal string? certificate_url { get; set; }
+        public string? certificate_url { get; set; }
     }
     
-    internal class RootObject
+    public class RootObject
     {
-        internal Spec? spec { get; set; }
+        public Spec? spec { get; set; }
     }
     
-    internal struct PostRoot
+    public struct PostRoot
     {
         [JsonPropertyName("metadata")]
-        internal Metadata Metadata { get; set; }
+        public Metadata Metadata { get; set; }
     
         [JsonPropertyName("spec")]
-        internal PostSpec Spec { get; set; }
+        public PostSpec Spec { get; set; }
     }
 
-    internal struct Metadata
+    public struct Metadata
     {
         [JsonPropertyName("name")]
-        internal string Name { get; set; }
+        public string Name { get; set; }
 
         [JsonPropertyName("disable")]
-        internal bool Disable { get; set; }
+        public bool Disable { get; set; }
     }
 
-    internal struct PostSpec
+    public struct PostSpec
     {
         [JsonPropertyName("certificate_url")]
-        internal string certificate_url { get; set; }
+        public string certificate_url { get; set; }
 
         [JsonPropertyName("private_key")]
-        internal PrivateKey PrivateKey { get; set; }
+        public PrivateKey PrivateKey { get; set; }
 
         [JsonPropertyName("disable_ocsp_stapling")]
-        internal DisableOcspStapling DisableOcspStapling { get; set; }
+        public DisableOcspStapling DisableOcspStapling { get; set; }
     }
 
-    internal struct PrivateKey
+    public struct PrivateKey
     {
         [JsonPropertyName("clear_secret_info")]
-        internal ClearSecretInfo ClearSecretInfo { get; set; }
+        public ClearSecretInfo ClearSecretInfo { get; set; }
     }
 
-    internal struct ClearSecretInfo
+    public struct ClearSecretInfo
     {
         [JsonPropertyName("url")]
-        internal string Location { get; set; }
+        public string Location { get; set; }
     }
     
-    internal struct DisableOcspStapling
+    public struct DisableOcspStapling
     {
     }
     
-    internal struct PostChainRoot
+    public struct PostChainRoot
     {
         [JsonPropertyName("metadata")]
-        internal Metadata Metadata { get; set; }
+        public Metadata Metadata { get; set; }
     
         [JsonPropertyName("spec")]
-        internal PostChainSpec Spec { get; set; }
+        public PostChainSpec Spec { get; set; }
     }
     
-    internal struct PostChainSpec
+    public struct PostChainSpec
     {
         [JsonPropertyName("certificate_url")]
-        internal string certificate_url { get; set; }
+        public string certificate_url { get; set; }
     }
     
-    internal struct CaPostRoot
+    public struct CaPostRoot
     {
         [JsonPropertyName("metadata")]
-        internal Metadata Metadata { get; set; }
+        public Metadata Metadata { get; set; }
     
         [JsonPropertyName("spec")]
-        internal CaSpec Spec { get; set; }
+        public CaSpec Spec { get; set; }
     }
     
-    internal class CaSpec
+    public class CaSpec
     {
-        internal string? trusted_ca_url { get; set; }
+        public string? trusted_ca_url { get; set; }
     }
     
-    internal class CaRootObject
+    public class CaRootObject
     {
-        internal CaSpec? spec { get; set; }
+        public CaSpec? spec { get; set; }
     }
 
     private string HostName { get; set; }
@@ -196,9 +196,12 @@ internal class F5WafClient
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{HostName}/api/config/namespaces/{f5Namespace}/certificates/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
         string result = SubmitRequest(request);
 
+        RootObject rootObject = JsonSerializer.Deserialize<RootObject>(result)
+                                 ?? throw new InvalidOperationException("Deserialized RootObject is null.");
+
         _logger.MethodExit(LogLevel.Debug);
 
-        return result;
+        return rootObject.spec?.certificate_url;
     }
     
     internal string? GetCaCertificateContentsFromF5(string f5Namespace, string certName)
@@ -208,9 +211,12 @@ internal class F5WafClient
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{HostName}/api/config/namespaces/{f5Namespace}/trusted_ca_lists/{certName}?response_format=GET_RSP_FORMAT_DEFAULT");
         string result = SubmitRequest(request);
 
+        CaRootObject rootObject = JsonSerializer.Deserialize<CaRootObject>(result)
+                                ?? throw new InvalidOperationException("Deserialized RootObject is null.");
+
         _logger.MethodExit(LogLevel.Debug);
 
-        return result;
+        return rootObject.spec?.trusted_ca_url;
     }
 
     internal string GetNamespaces()
