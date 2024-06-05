@@ -478,7 +478,7 @@ public class F5WafClient
         _logger.MethodEntry(LogLevel.Debug);
 
         string certType = isTLSCertificate ? "certificates" : "trusted_ca_lists";
-        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, $"{HostName}/api/config/namespaces/{f5Namespace}/{certType}");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, $"{HostName}/api/config/namespaces/{f5Namespace}/{certType}/{certName}");
         string result = SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
