@@ -87,8 +87,9 @@ public class Management : Job, IManagementJobExtension
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        if (F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias) &&
-            !config.Overwrite)
+        bool certificateExists = F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath, config.JobCertificate.Alias, true);
+
+        if (certificateExists && !config.Overwrite)
         {
             string message =
                 $"Certificate with alias \"{config.JobCertificate.Alias}\" already exists in F5, and job was not configured to overwrite.";
@@ -96,9 +97,7 @@ public class Management : Job, IManagementJobExtension
         }
 
         F5WafClient.PostRoot reqBody = F5Client.FormatTlsCertificateRequest(config.JobCertificate); 
-        if (F5Client.CertificateExistsInF5(config.CertificateStoreDetails.StorePath,
-                config.JobCertificate.Alias) &&
-            config.Overwrite)
+        if (certificateExists && config.Overwrite)
         {
             _logger.LogDebug("Overwrite is enabled, replacing certificate in F5 called \"{0}\"",
                 config.JobCertificate.Alias);

@@ -344,7 +344,7 @@ public class F5WafClient
             jsonReqBody = JsonSerializer.Serialize(tlsReqBody);
         }
 
-        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{HostName}/api/config/namespaces/{f5Namespace}/{isTLSCertificate}");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{HostName}/api/config/namespaces/{f5Namespace}/{certType}");
         
         var stringReqBody = new StringContent(jsonReqBody, Encoding.UTF8, "application/json");
         request.Content = stringReqBody;
@@ -478,17 +478,17 @@ public class F5WafClient
         _logger.MethodEntry(LogLevel.Debug);
 
         string certType = isTLSCertificate ? "certificates" : "trusted_ca_lists";
-        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, $"{HostName}/api/config/namespaces/{f5Namespace}/{isTLSCertificate}");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, $"{HostName}/api/config/namespaces/{f5Namespace}/{certType}");
         string result = SubmitRequest(request);
 
         _logger.MethodExit(LogLevel.Debug);
     }
 
-    internal bool CertificateExistsInF5(string f5Namespace, string alias)
+    internal bool CertificateExistsInF5(string f5Namespace, string alias, bool isTLSCertificate)
     {
         _logger.MethodEntry(LogLevel.Debug);
 
-        var certsJson = GetTlsCertificatesFromF5(f5Namespace);
+        var certsJson = isTLSCertificate ? GetTlsCertificatesFromF5(f5Namespace) : GetCaCertificatesFromF5(f5Namespace);
         var certs = JsonDocument.Parse(certsJson);
 
         _logger.MethodExit(LogLevel.Debug);
