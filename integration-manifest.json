@@ -6,7 +6,7 @@
   "update_catalog": true,
   "link_github": true,
   "support_level": "kf-supported",
-  "description": "The F5 WAF Orchestrator allows for the remote management of F5 WAF Distributed Cloud Stores. Discovery, Inventory, and Management functions are supported.",
+  "description": "The F5 WAF Orchestrator is an extension to the Keyfactor Universal Orchestrator. It Integrates with the Multi-Cloud App Connect, which is F5 Distributed Cloud's service for connecting apps across clouds, edge and on premises using load balancers. The purpose of the F5 WAF orchestrator is to manage the TLS certificates that are bound to the load balancers. This also includes managing the intermediate certificate chains and root CAs of these TLS certificates. The orchestrator facilitates the inventory, addition, removal, and discovery of certificates intended for use with load balancers. ",
   "about": {
     "orchestrator": {
       "UOFramework": "10.4.1",

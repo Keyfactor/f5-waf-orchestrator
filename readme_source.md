@@ -1,146 +1,160 @@
-<span style="color:red">**Please note that this integration will work with the Universal Orchestrator version 10.1 or earlier, OR 10.4.1 or greater**</span>
+## Overview
+The F5 WAF Orchestrator extension remotely manages TLS and CA Root certificates uploaded to F5 Distributed Multi-Cloud App Connect, which is the F5 platform that manages WAF services. Certificates bound to Http Load Balancers within Multi-Cloud App Connect can be renewed/replaced, but they cannot be removed.  Certificate store types f5WafTls and f5WafCa are used to manage stores containing TLS and CA Root certificates, respectively.
 
-## Use Cases
+<details>
+<summary>f5WafTls</summary>
 
-The F5 Orchestrator supports three different types of certificates stores with the capabilities for each below:
+The f5WafTls certificate store type is used to manage F5 Distributed Multi-Cloud App Connect TLS certificates.
 
-- CA Bundles
-  - Discovery
-  - Inventory*
-  - Management (Add and Remove)
-- Web Server Device Certificates
-  - Inventory*
-  - Management (Add, but replacement/renewal of existing certificate only) 
-- SSL Certificates
-  - Discovery
-  - Inventory*
-  - Management (Add and Remove)  
+Use cases supported:
+1. Discovery of TLS stores.  Discovery for F5 WAF returns any discoverable namespaces in the F5 WAF instance.
+2. Inventory of a TLS store.  All TLS certificates, bound or unbound, within a namespace will be returned to Keyfactor Command.
+3. Management-Add.  Add a new certificate or renew an existing one.  Renew will work for both bound and unbound certificates.  All existing binding will remain in place, bound to the same alias with the newly replaced/renewed certificate.
+4. Management-Delete.  Remove an existing certificate.  Will only work for unbound certificates.
 
-*Special note on private keys: One of the pieces of information that Keyfactor collects during an Inventory job is whether or not the certificate stored in F5 has a private key.  The private key is NEVER actually retrieved by Keyfactor, but Keyfactor does track whether one exists.  F5 does not provide an API to determine this, so by convention, all CA Bundle certificates are deemed to not have private keys, while Web Server and SSL certificates are deemed to have them.  Any Management jobs adding (new or renewal) a certificate will renew without the private key for CA Bundle stores and with the private key for Web Server or SSL stores.
+</details>
 
+<details>
+<summary>f5WafCa</summary>
 
+The f5WafCa certificate store type is used to manage F5 Distributed Multi-Cloud App Connect CA Root certificates.
 
+Use cases supported:
+1. Discovery of TLS stores.  Discovery for F5 WAF returns any discoverable namespaces in the F5 WAF instance.
+2. Inventory of a TLS store.  All CA Root certificates within a namespace will be returned to Keyfactor Command.
+3. Management-Add.  Add a new certificate or renew an existing one.
+4. Management-Delete.  Remove an existing certificate.  Please note, for CA Root certicates, deleting an existing certificate will replace ALL instances of the same certificate and not only the one represented by the intended alias.  This is an F5 WAF feature that the integration has no control over.
 
-## Versioning
-
-The version number of a the F5 Orchestrator can be verified by right clicking on the F5Orchestrator.dll file, selecting Properties, and then clicking on the Details tab.
-
-## F5 Orchestrator Installation
-
-1. Stop the Keyfactor Universal Orchestrator Service.
-2. In the Keyfactor Orchestrator installation folder (by convention usually C:\Program Files\Keyfactor\Keyfactor Orchestrator), find the "extensions" folder. Underneath that, create a new folder named F5 or another name of your choosing.
-3. Download the latest version of the F5 Orchestrator from [GitHub](https://github.com/Keyfactor/f5-rest-orchestrator).
-4. Copy the contents of the download installation zip file into the folder created in step 1.
-5. Start the Keyfactor Universal Orchestrator Service.
+</details>
 
 
-## F5 Orchestrator Configuration
+## F5 WAF Orchestrator Extension Installation
 
-**1. In Keyfactor Command, if any of the aforementioned certificate store types do not already exist, create a new certificate store type for each of the 3 that you wish to manage by navigating to Settings (the "gear" icon in the top right) => Certificate Store Types.**
-
-**<u>CA Bundles:</u>**
-
-![](images/image1.png)
-![](images/image2.png)
-
-
-
-**<u>Web Server Certificates</u>**
-
-![](images/image9.png)
-![](images/image10.png)
+1. Refer to the [Creating Certificate Store Types](#creating-certificate-store-types) section to create the certificate store types you wish to manage.
+2. Stop the Keyfactor Universal Orchestrator Service on the server you plan to install this extension to run on.
+3. In the Keyfactor Orchestrator installation folder (by convention usually C:\Program Files\Keyfactor\Keyfactor Orchestrator for a Windows install or /opt/keyfactor/orchestrator/ for a Linux install), find the "Extensions" folder. Underneath that, create a new folder named "F5Waf". You may choose to use a different name if you wish.
+4. Download the latest version of the F5 WAF orchestrator extension from [GitHub](https://github.com/Keyfactor/f5-waf-orchestrator).  Click on the "Latest" release link on the right hand side of the main page and download the first zip file.
+5. Copy the contents of the download installation zip file to the folder created in step 3.
+6. (Optional) If you decide to create one or more certificate store types with short names different than the suggested values, edit the manifest.json file in the folder you created in step 3, and modify each "ShortName" in each "Certstores.{ShortName}.{Operation}" line with the ShortName you used to create the respective certificate store type.
+7. Start the Keyfactor Universal Orchestrator Service.
 
 
+## Creating Certificate Store Types
 
-**<u>SSL Certificates</u>**
+Below are the two certificate store types that the F5 WAF Orchestator Extension manages.  To create a new Certificate Store Type in Keyfactor Command, first click on settings (the gear icon on the top right) => Certificate Store Types => Add.  Next, follow the instructions under each store type you wish to set up.
 
-![](images/image11.png)
-![](images/image12.png)
+<details>  
+<summary>f5WafTls - TLS certificates in a namespace</summary>
 
-- **Name** – Required. The display name of the new Certificate Store Type
-- **Short Name** – Required. This value ***must match*** the folder name for this store type under the "extensions" folder in the install path.
-- **Custom Capability** - Leave unchecked
-- **Supported Job Types** – Select Inventory and Add for all 3 types, and Discovery for CA Bundles and SSL Certificates.
-- **General Settings** - Select Needs Server.  Leave Uses PowerShell unchecked.  Select Blueprint Allowed if you plan to use blueprinting.
-- **Password Settings** - Leave both options unchecked
-- **All selections on Advanced tab** - Set the values on this tab ***exactly*** as they are shown in the above screen prints for each applicable store type.
+- <i>Basic Tab:</i>
+
+  - **Name** – Required. The display name you wish to use for the new Certificate Store Type.
+  - **Short Name** – Required. Suggested value - **f5WafTls**.  If you choose to use a different value you must make the corresponding modification to the manifest.json file.  See [F5 WAF Orchestrator Extension Installation](#f5-waf-orchestrator-extension-installation), step 6 above.
+  - **Custom Capability** - Unchecked
+  - **Supported Job Types** - Inventory, Add, Remove, and Discovery should all be checked.
+  - **Needs Server** - Checked
+  - **Blueprint Allowed** - Checked if you wish to make use of blueprinting.  Please refer to the Keyfactor Command Reference Guide for more details on this feature.
+  - **Uses PowerShell** - Unchecked
+  - **Requires Store Password** - Unchecked
+  - **Supports Entry Password** - Unchecked  
+
+- <i>Advanced Tab:</i>
+
+  - **Store Path Type** - Freeform
+  - **Supports Custom Alias** - Required.
+  - **Private Key Handling** - Required.  
+  - **PFX Password Style** - Default  
+
+- <i>Custom Fields Tab:</i>
+
+  - no additional custom fields  
+
+- <i>Entry Parameters Tab:</i>
+
+  - no additional entry parameters  
+
+</details>  
+
+<details>  
+<summary>f5WafCa - CA Root certificates in a namespace</summary>
+
+- <i>Basic Tab:</i>
+
+  - **Name** – Required. The display name you wish to use for the new Certificate Store Type.
+  - **Short Name** – Required. Suggested value - **f5WafCa**.  If you choose to use a different value you must make the corresponding modification to the manifest.json file.  See [F5 WAF Orchestrator Extension Installation](#f5-waf-orchestrator-extension-installation), step 6 above.
+  - **Custom Capability** - Unchecked
+  - **Supported Job Types** - Inventory, Add, Remove, and Discovery should all be checked.
+  - **Needs Server** - Checked
+  - **Blueprint Allowed** - Checked if you wish to make use of blueprinting.  Please refer to the Keyfactor Command Reference Guide for more details on this feature.
+  - **Uses PowerShell** - Unchecked
+  - **Requires Store Password** - Unchecked
+  - **Supports Entry Password** - Unchecked  
+
+- <i>Advanced Tab:</i>
+
+  - **Store Path Type** - Freeform
+  - **Supports Custom Alias** - Required.
+  - **Private Key Handling** - Forbidden.  
+  - **PFX Password Style** - Default  
+
+- <i>Custom Fields Tab:</i>
+
+  - no additional custom fields  
+
+- <i>Entry Parameters Tab:</i>
+
+  - no additional entry parameters  
+
+</details>  
 
 
+## Creating Certificate Stores and Scheduling Discovery Jobs
 
-The Custom Fields tab contains 10 custom store parameters (3 of which, Server Username, Server Password, and Use SSL were set up on the Basic tab and are not actually custom parameters you need or want to modify on this tab).  The set up is consistent across store types, and should look as follows:
+When creating new certificate stores or scheduling discovery jobs in Keyfactor Command, there are a few fields that are important to highlight here:
 
-![](images/image3.png)<br>  
-![](images/image6.png)<br>  
-![](images/image7.png)<br>  
-![](images/image8.png)<br>  
-![](images/image4.png)<br>  
-![](images/image5.png)<br>  
-![](images/image15.png)<br>  
-![](images/image16.png)<br>  
+<details>
+<summary>Certificate Stores</summary>
 
-If any or all of the 3 certificate store types were already set up on installation of Keyfactor, you may only need to add Primary Node Online Required and Ignore SSL Warning.  These parameters, however, are optional and only necessary if needed to be set to true.  Please see the descriptions below in "2a. Create a F5 Certificate Store wihin Keyfactor Command.
+The following table describes the required and optional fields for the `f5WafTls` and `f5WafCa` certificate store types when creating a certificate store.
+
+In Keyfactor Command, navigate to Certificate Stores from the Locations Menu. Click the Add button to create a new Certificate Store.
+
+| Attribute | Description                                                                                                                                    |
+| --------- |------------------------------------------------------------------------------------------------------------------------------------------------|
+| Category | Select either f5WafTls or f5WafCa depending on whether you want to manage TLS certificates or Root CA certificates.                                        |
+| Container | Optional container to associate certificate store with.                                                                                        |
+| Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'.                                                 |
+| Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage.                                                          |
+| Orchestrator | Select an approved orchestrator capable of managing F5 WAF certificates. Specifically, one with the f5WafTls and f5WafCa capabilities.         |
+| Server Username | The username used to log in to the F5 Distributed Cloud instance (typically an email). |
+| Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings.  Please see [Creating an F5 WAF API Token](#creating-an-f5-waf-api-token) for more details on creating this token.  |
+| Use SSL | Not used for this integration, so either setting is fine.                |
+
+</details>
+
+<details
+<summary>Discovery Jobs</summary>
+
+The following table describes the required and optional fields to schedule a Discovery job for the `f5WafTls` and `f5WafCa` certificate store types.
+
+In Keyfactor Command, navigate to Certificate Stores from the Locations Menu and then click on the Discover tab.
+
+| Attribute | Description                                                                                                                                    |
+| --------- |------------------------------------------------------------------------------------------------------------------------------------------------|
+| Category | Select either F5WafTls or F5WafCa depending on whether you want to return namespaces for TLS certificates or CA Root certificates.                                        |
+| Orchestrator | Select an approved orchestrator capable of managing F5 WAF certificates. Specifically, one with the f5WafTls and f5WafCa capabilities.         |
+| Schedule | Enter the schedule for when you want the job to run   |
+| Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'.                                                 |
+| Server Username | The username used to log in to the F5 Distributed Cloud instance (typically an email). |
+| Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings.  Please see [Creating an F5 WAF API Token](#creating-an-f5-waf-api-token) for more details on creating this token.  |
+| Directories to Search | Not used for this integration.  Leave Blank.  |
+| Directories to ignore | Not used for this integration.  Leave Blank.  |
+| Extensions | Not used for this integration.  Leave Blank.  |
+| File name patterns to match | Not used for this integration.  Leave Blank.  |
+| Follow SymLinks | Not used for this integration.  Leave Unchecked.  |  
+| Follow SymLinks | Not used for this integration.  Leave Unchecked.  |  
+| Use SSL? | Not used for this integration.  Leave Unchecked.  |  
+
+Discovery jobs will return all known namespaces for this F5 WAF instance.  Please note that because Keyfactor Command has a restriction on multiple certificate stores having the same Client Machine and Store Path, certificate stores for f5WafTls will return stores with a "tls-" prefixed to the beginning of the store path (namespace); while f5WafCA stores will have "ca-" prefixed.  Any jobs that run for stores with these prefixes will have these prefixes removed before calling any F5 WAF APIs.  What this means is a store path (namespace) for an f5WafTls store of "tls-namespace1" will be the same as one labeled "namespace1".
 
 
-
-**2a. Create a F5 Certificate Store within Keyfactor Command**  
-![](images/image13.png)  
-
-If you choose to manually create a F5 store In Keyfactor Command rather than running a Discovery job (Step 2b) to automatically find the store, you can navigate to Certificate Locations =\> Certificate Stores within Keyfactor Command to add the store. Below are the values that should be entered.![](Images/Image13.png)
-
-- **Category** – Required.  One of the 3 F5 store types - F5 Web Server REST, F5 CA Bundles REST, or F5 SSL Profiles REST (your configured names may be different based on what you entered when creating the certificate store types in Step 1).
-
-- **Container** – Optional.  Select a container if utilized.
-
-- **Client Machine & Credentials** – Required.  The server name or IP Address and login credentials for the F5 device.  The credentials for server login can be any of:
-  
-  - UserId/Password
-  
-  - PAM provider information to pass the UserId/Password or UserId/SSH private key credentials
-    
-  When entering the credentials, UseSSL ***must*** be selected.
-  
-- **Store Path** – Required.  Enter the name of the partition on the F5 device you wish to manage.  This value is case sensitive, so if the partition name is "Common", it must be entered as "Common" and not "common".
-
-- **Primary Node Online Required** – Optional.  Select this if you wish to stop the orchestrator from adding, replacing or renewing certificates on nodes that are inactive.  If this is not selected, adding, replacing and renewing certificates on inactive nodes will be allowed.  If you choose not to add this custom field, the default value of False will be assumed.
-
-- **Primary Node** - Only required (and shown) if Primary Node Online Required is added and selected.  Enter the fully qualified domain name of the F5 device that acts as the primary node in a highly available F5 implementation.  If you're using a single F5 device, this will typically be the same value you entered in the Client Machine field.
-
-- **Primary Node Check Retry Maximum** - Only required (and shown) if Primary Node Online Required is added and selected.  Enter the number of times a Management-Add job will attempt to add/replace/renew a certificate if the node is inactive before failing.
-
-- **Primary Node Check Retry Wait Seconds** - Only required (and shown) if Primary Node Online Required is added and selected.  Enter the number of seconds to wait between attempts to add/replace/renew a certificate if the node is inactive.
-
-- **Version of F5** - Required.  Select v13, v14, or v15 to match the version for the F5 device being managed
-
-- **Ignore SSL Warning** - Optional.  Select this if you wish to ignore SSL warnings from F5 that occur during API calls when the site does not have a trusted certificate with the proper SAN bound to it.  If you choose not to add this custom field, the default value of False will be assumed and SSL warnings will cause errors during orchestrator extension jobs.
-
-- **Use Token Authentication** - Optional.  Select this if you wish to use F5's token authentiation instead of basic authentication for all API requests.  If you choose not to add this custom field, the default value of False will be assumed and basic authentication will be used for all API requests for all jobs.  Setting this value to True will enable an initial basic authenticated request to acquire an authentication token, which will then be used for all subsequent API requests.
-
-- **Orchestrator** – Required.  Select the orchestrator you wish to use to manage this store
-
-- **Inventory Schedule** – Set a schedule for running Inventory jobs or none, if you choose not to schedule Inventory at this time.
-
-**2b. (Optional) Schedule a F5 Discovery Job**
-
-Rather than manually creating F5 certificate stores, you can schedule a Discovery job to search find them (CA Bundle and SSL Certificate store types only).
-
-First, in Keyfactor Command navigate to Certificate Locations =\> Certificate Stores. Select the Discover tab and then the Schedule button. Complete the dialog and click Done to schedule.
-![](images/image14.png)
-
-- **Category** – Required. The F5 store type you wish to find stores for.
-
-- **Orchestrator** – Select the orchestrator you wish to use to manage this store
-
-- **Client Machine & Credentials** – Required.  The server name or IP Address and login credentials for the F5 device.  The credentials for server login can be any of:
-
-  - UserId/Password
-  - PAM provider information to pass the UserId/Password or UserId/SSH private key credentials
-  
-  When entering the credentials, UseSSL ***must*** be selected.
-  
-- **When** – Required. The date and time when you would like this to execute.
-
-- **Directories to search** – Required but not used. This field is not used in the search to Discover certificate stores, but ***is*** a required field in this dialog, so just enter any value.  It will not be used.
-
-- **Directories to ignore/Extensions/File name patterns to match/Follow SymLinks/Include PKCS12 Files** – Not used.  Leave blank.
-
-Once the Discovery job has completed, a list of F5 certificate store locations should show in the Certificate Stores Discovery tab in Keyfactor Command. Right click on a store and select Approve to bring up a dialog that will ask for the remaining necessary certificate store parameters described in Step 2a.  Complete those and click Save, and the Certificate Store should now show up in the list of stores in the Certificate Stores tab.
