@@ -1,7 +1,7 @@
 
 # F5 WAF
 
-The F5 WAF Orchestrator is an extension to the Keyfactor Universal Orchestrator. It Integrates with the Multi-Cloud App Connect, which is F5 Distributed Cloud's service for connecting apps across clouds, edge and on premises using load balancers. The purpose of the F5 WAF orchestrator is to manage the TLS certificates that are bound to the load balancers. This also includes managing the intermediate certificate chains and root CAs of these TLS certificates. The orchestrator facilitates the inventory, addition, removal, and discovery of certificates intended for use with load balancers. 
+The F5 WAF Orchestrator is an extension to the Keyfactor Universal Orchestrator. It Integrates with Multi-Cloud App Connect, which is F5 Distributed Cloud's service for connecting apps across clouds and within on premise installationss using load balancers. The purpose of the F5 WAF orchestrator is to manage the TLS and CA Root certificates. The TLS certificates may be bound to load balancers.  The orchestrator facilitates the inventory, addition, renewal, and removal of these certificates as well as the discovery of namespaces (certificate stores) within the F5 Multi-Cloud App Connect instance.
 
 #### Integration status: Pilot - Ready for use in test environments. Not for use in production.
 
