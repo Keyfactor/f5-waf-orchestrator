@@ -232,7 +232,7 @@ In Keyfactor Command, navigate to Certificate Stores from the Locations Menu. Cl
 
 </details>
 
-<details
+<details>
 <summary>Discovery Jobs</summary>
 
 The following table describes the required and optional fields to schedule a Discovery job for the `f5WafTls` and `f5WafCa` certificate store types.
