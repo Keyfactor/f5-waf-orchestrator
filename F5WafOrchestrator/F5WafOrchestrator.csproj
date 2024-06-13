@@ -1,7 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <TargetFramework>net6.0</TargetFramework>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Keyfactor.Extensions.Orchestrator.F5WafOrchestrator</RootNamespace>
@@ -9,6 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="BouncyCastle.Cryptography" Version="2.3.0" />
         <PackageReference Include="Keyfactor.Logging" Version="1.1.1" />
         <PackageReference Include="Keyfactor.Orchestrators.IOrchestratorJobExtensions" Version="0.7.0" />
         <PackageReference Include="netvmomi.API" Version="1.0.16" />
@@ -32,11 +35,15 @@
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DefineConstants></DefineConstants>
-        <BaseOutputPath>C:\Program Files\Keyfactor\Keyfactor Orchestrator\extensions\F5WafOrchestrator</BaseOutputPath>
+        <BaseOutputPath></BaseOutputPath>
         <OutputPath>$(BaseOutputPath)</OutputPath>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
         
     </PropertyGroup>
+
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+      <Exec Command="echo F | xcopy &quot;$(ProjectDir)manifest.json&quot; &quot;$(TargetDir)\manifest.json&quot; /Y" />
+    </Target>
 
 </Project>
