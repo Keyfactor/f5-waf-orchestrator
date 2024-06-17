@@ -1,4 +1,4 @@
-// Copyright 2023 Keyfactor
+// Copyright 2024 Keyfactor
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,63 +17,62 @@ using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Common.Enums;
 using Keyfactor.Orchestrators.Extensions;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 
 namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.TLS;
 
-[Job("Inventory")]
-public class Inventory : Job<Inventory>, IInventoryJobExtension
+public class Inventory : Job, IInventoryJobExtension
 {
     private readonly ILogger _logger = LogHandler.GetClassLogger<Inventory>();
 
     public JobResult ProcessJob(InventoryJobConfiguration config, SubmitInventoryUpdate cb)
     {
-        _logger.LogDebug("Beginning F5 Distributed Cloud Inventory Job");
-        
-        var result = new JobResult
-        {
-            Result = OrchestratorJobStatusJobResult.Failure,
-            JobHistoryId = config.JobHistoryId
-        };
-        
+        _logger.LogDebug($"Begin {config.Capability} for job id {config.JobId}...");
+        _logger.LogDebug($"Server: {config.CertificateStoreDetails.ClientMachine}");
+        _logger.LogDebug($"Store Path: {config.CertificateStoreDetails.StorePath}");
+
+        List<CurrentInventoryItem> inventoryItems;
+
         try
         {
             F5Client = new F5WafClient(config.CertificateStoreDetails.ClientMachine, config.ServerPassword);
-        } catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Could not connect to F5 Client" + ex.Message);
-            return result;
-        }
 
-        List<CurrentInventoryItem> inventoryItems;
-        string storePath = config.CertificateStoreDetails.StorePath;
-        try
-        {
-            // check if the string starts with "ca-" and remove it if present
+            string storePath = config.CertificateStoreDetails.StorePath;
+
+            // check if the string starts with "tls-" and remove it if present.  This may occur
+            //   if store was created in Command via a Discovery job
             if (config.CertificateStoreDetails.StorePath.StartsWith("tls-"))
             {
-                storePath = config.CertificateStoreDetails.StorePath.Substring(4);  // Skip the first 3 characters ("ca-")
+                storePath = config.CertificateStoreDetails.StorePath.Substring(4);  // Skip the first 4 characters ("tls-")
             }
             
             var (names, certs) = F5Client.TlsCertificateRetrievalProcess(storePath);
             inventoryItems = certs.Zip(names, (certificate, name) => new CurrentInventoryItem
             {
                 Alias = name,
-                Certificates = new List<string> { certificate },
-                PrivateKeyEntry = false,
-                UseChainLevel = false
+                Certificates = Regex.Split(certificate, @"(?=-----BEGIN)").Where(p => p != string.Empty),
+                PrivateKeyEntry = true,
+                UseChainLevel = true
             }).ToList();
             _logger.LogDebug($"Found {inventoryItems.Count} certificates in namespace {storePath}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting F5 Certificate from namespace {storePath}:\n" + ex.Message);
-            result.FailureMessage = $"Error getting F5 Certificates from namespace {storePath}:\n" + ex.Message;
-            return result;
+            _logger.LogError($"Exception for {config.Capability}: {F5WAFException.FlattenExceptionMessages(ex, string.Empty)} for job id {config.JobId}");
+            return new JobResult() { Result = OrchestratorJobStatusJobResult.Failure, JobHistoryId = config.JobHistoryId, FailureMessage = F5WAFException.FlattenExceptionMessages(ex, $"Site {config.CertificateStoreDetails.StorePath} on server {config.CertificateStoreDetails.ClientMachine}:") };
         }
-        
-        cb.Invoke(inventoryItems);
 
-        result.Result = OrchestratorJobStatusJobResult.Success;
-        return result;
+        try
+        {
+            cb.Invoke(inventoryItems);
+            _logger.LogDebug($"...End {config.Capability} job for job id {config.JobId}");
+            return new JobResult() { Result = OrchestratorJobStatusJobResult.Success, JobHistoryId = config.JobHistoryId };
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = F5WAFException.FlattenExceptionMessages(ex, string.Empty);
+            _logger.LogError($"Exception returning certificates for {config.Capability}: {errorMessage} for job id {config.JobId}");
+            return new JobResult() { Result = OrchestratorJobStatusJobResult.Failure, JobHistoryId = config.JobHistoryId, FailureMessage = F5WAFException.FlattenExceptionMessages(ex, $"Site {config.CertificateStoreDetails.StorePath} on server {config.CertificateStoreDetails.ClientMachine}:") };
+        }
     }
 }
