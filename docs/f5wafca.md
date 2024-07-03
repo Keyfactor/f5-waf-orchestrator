@@ -117,8 +117,8 @@ The following table describes the required and optional fields for the `f5WafCa`
 | --------- | ----------- | ------------------------- |
 | Category | Select "F5 WAF CA" or the customized certificate store name from the previous step. | |
 | Container | Optional container to associate certificate store with. | |
-| Client Machine | For the Client Machine field, enter the URL for the F5 Distributed Cloud instance, which typically ends in '.console.ves.volterra.io'. For example, 'https://example.console.ves.volterra.io'. | |
-| Store Path | For the Store Path field, enter the Multi-Cloud App Connect namespace containing the CA Root certificates you wish to manage. For example, 'namespace1'. | |
+| Client Machine | The URL for the F5 Distributed Cloud instance, typically formatted as 'https://<instance-name>.console.ves.volterra.io'. Example: 'https://example.console.ves.volterra.io'. | |
+| Store Path | The namespace within Multi-Cloud App Connect that contains the CA Root certificates to be managed. Example: 'namespace1'. | |
 | Orchestrator | Select an approved orchestrator capable of managing `f5WafCa` certificates. Specifically, one with the `f5WafCa` capability. | |
 
 * **Using kfutil**
