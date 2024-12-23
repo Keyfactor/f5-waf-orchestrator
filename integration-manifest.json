@@ -26,7 +26,28 @@
             "Enrollment": false,
             "Remove": true
           },
-          "Properties": [],
+          "Properties": [
+            {
+              "Name": "ServerUsername",
+              "DisplayName": "Server Username",
+              "Type": "Secret",
+              "DependsOn": "",
+              "DefaultValue": "",
+              "Required": false,
+              "IsPAMEligible": false,
+              "Description": "Not used, but a value is required.  Enter anything into this field."
+            },
+            {
+              "Name": "ServerPassword",
+              "DisplayName": "Server Password",
+              "Type": "Secret",
+              "DependsOn": "",
+              "DefaultValue": "",
+              "Required": false,
+              "IsPAMEligible": false,
+              "Description": "The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token."
+            }
+          ],
           "EntryParameters": [],
           "PasswordOptions": {
             "EntrySupported": false,
@@ -38,7 +59,9 @@
           "ServerRequired": true,
           "PowerShell": false,
           "BlueprintAllowed": true,
-          "CustomAliasAllowed": "Required"
+          "CustomAliasAllowed": "Required",
+          "ClientMachineDescription": "The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io').",
+          "StorePathDescription": "The Multi-Cloud App Connect namespace containing the certificates you wish to manage."
         },
         {
           "Name": "F5 WAF CA",
@@ -59,8 +82,8 @@
               "DependsOn": "",
               "DefaultValue": "",
               "Required": false,
-              "IsPAMEligible": true,
-              "Description": "A username (or valid PAM key if the username is stored in a KF Command configured PAM integration). If acting as an *agent* using local file access, just check *No Value*"
+              "IsPAMEligible": false,
+              "Description": "Not used, but a value is required.  Enter anything into this field."
             },
             {
               "Name": "ServerPassword",
@@ -70,7 +93,7 @@
               "DefaultValue": "",
               "Required": false,
               "IsPAMEligible": true,
-              "Description": "A password (or valid PAM key if the password is stored in a KF Command configured PAM integration). The password can also be an SSH private key if connecting via SSH to a server using SSH private key authentication. If acting as an *agent* using local file access, just check *No Value*"
+              "Description": "The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token."
             }
           ],
           "EntryParameters": [],
@@ -84,7 +107,9 @@
           "ServerRequired": true,
           "PowerShell": false,
           "BlueprintAllowed": true,
-          "CustomAliasAllowed": "Required"
+          "CustomAliasAllowed": "Required",
+          "ClientMachineDescription": "The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io').",
+          "StorePathDescription": "The Multi-Cloud App Connect namespace containing the certificates you wish to manage."
         }
       ]
     }
