@@ -39,10 +39,14 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
 
 
 ### f5WafTls
-TODO Global Store Type Section is an optional section. If this section doesn't seem necessary on initial glance, please delete it. Refer to the docs on [Confluence](https://keyfactor.atlassian.net/wiki/x/SAAyHg) for more info
 
+The f5WafTls certificate store type is used to manage F5 Distributed Multi-Cloud App Connect TLS certificates.
 
-TODO Overview is a required section
+Use cases supported:
+1. Discovery of TLS stores.  Discovery for F5 WAF returns any discoverable namespaces in the F5 WAF instance.
+2. Inventory of a TLS store.  All TLS certificates, bound or unbound, within a namespace will be returned to Keyfactor Command.
+3. Management-Add.  Add a new certificate or renew an existing one.  Renew will work for both bound and unbound certificates.  All existing binding will remain in place, bound to the same alias with the newly replaced/renewed certificate.
+4. Management-Delete.  Remove an existing certificate.  Will only work for unbound certificates.
 </details>
 
 <details><summary>F5 WAF CA (f5WafCa)</summary>
@@ -83,18 +87,6 @@ F5 Multi-Cloud App Connect uses API tokens to authenticate when calling APIs.  A
 ![](Images/image5.gif)
 ![](Images/image6.gif)
 
-<details><summary>F5 WAF TLS (f5WafTls)</summary>
-
-### F5 WAF TLS Requirements
-TODO Global Store Type Section is an optional section. If this section doesn't seem necessary on initial glance, please delete it. Refer to the docs on [Confluence](https://keyfactor.atlassian.net/wiki/x/SAAyHg) for more info
-
-
-TODO Requirements is an optional section. If this section doesn't seem necessary on initial glance, please delete it. Refer to the docs on [Confluence](https://keyfactor.atlassian.net/wiki/x/SAAyHg) for more info
-</details>
-
-
-
-
 
 ## Create Certificate Store Types
 
@@ -103,8 +95,6 @@ To use the F5 WAF Universal Orchestrator extension, you **must** create the Cert
 The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types. Depending on your use case, you may elect to use one, or both of these Certificate Store Types.
 
 <details><summary>F5 WAF TLS (f5WafTls)</summary>
-
-TODO Global Store Type Section is an optional section. If this section doesn't seem necessary on initial glance, please delete it. Refer to the docs on [Confluence](https://keyfactor.atlassian.net/wiki/x/SAAyHg) for more info
 
 
 * **Create f5WafTls using kfutil**:
@@ -284,11 +274,64 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
 
 <details><summary>F5 WAF TLS (f5WafTls)</summary>
 
-TODO Global Store Type Section is an optional section. If this section doesn't seem necessary on initial glance, please delete it. Refer to the docs on [Confluence](https://keyfactor.atlassian.net/wiki/x/SAAyHg) for more info
 
-TODO Certificate Store Configuration is an optional section. If this section doesn't seem necessary on initial glance, please delete it. Refer to the docs on [Confluence](https://keyfactor.atlassian.net/wiki/x/SAAyHg) for more info
+* **Manually with the Command UI**
+
+    <details><summary>Create Certificate Stores manually in the UI</summary>
+
+    1. **Navigate to the _Certificate Stores_ page in Keyfactor Command.**
+
+        Log into Keyfactor Command, toggle the _Locations_ dropdown, and click _Certificate Stores_.
+
+    2. **Add a Certificate Store.**
+
+        Click the Add button to add a new Certificate Store. Use the table below to populate the **Attributes** in the **Add** form.
+        | Attribute | Description |
+        | --------- | ----------- |
+        | Category | Select "F5 WAF TLS" or the customized certificate store name from the previous step. |
+        | Container | Optional container to associate certificate store with. |
+        | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'). |
+        | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
+        | Orchestrator | Select an approved orchestrator capable of managing `f5WafTls` certificates. Specifically, one with the `f5WafTls` capability. |
+        | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token. |
 
 
+        
+
+    </details>
+
+* **Using kfutil**
+    
+    <details><summary>Create Certificate Stores with kfutil</summary>
+    
+    1. **Generate a CSV template for the f5WafTls certificate store**
+
+        ```shell
+        kfutil stores import generate-template --store-type-name f5WafTls --outpath f5WafTls.csv
+        ```
+    2. **Populate the generated CSV file**
+
+        Open the CSV file, and reference the table below to populate parameters for each **Attribute**.
+        | Attribute | Description |
+        | --------- | ----------- |
+        | Category | Select "F5 WAF TLS" or the customized certificate store name from the previous step. |
+        | Container | Optional container to associate certificate store with. |
+        | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'). |
+        | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
+        | Orchestrator | Select an approved orchestrator capable of managing `f5WafTls` certificates. Specifically, one with the `f5WafTls` capability. |
+        | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token. |
+
+
+        
+
+    3. **Import the CSV file to create the certificate stores** 
+
+        ```shell
+        kfutil stores import csv --store-type-name f5WafTls --file f5WafTls.csv
+        ```
+    </details>
 
 > The content in this section can be supplimented by the [official Command documentation](https://software.keyfactor.com/Core-OnPrem/Current/Content/ReferenceGuide/Certificate%20Stores.htm?Highlight=certificate%20store).
 
@@ -410,12 +453,6 @@ In Keyfactor Command, navigate to Certificate Stores from the Locations Menu and
 
 Discovery jobs will return all known namespaces for this F5 WAF instance.  Please note that because Keyfactor Command has a restriction on multiple certificate stores having the same Client Machine and Store Path, certificate stores for f5WafTls will return stores with a "tls-" prefixed to the beginning of the store path (namespace); while f5WafCA stores will have "ca-" prefixed.  Any jobs that run for stores with these prefixes will have these prefixes removed before calling any F5 WAF APIs.  What this means is a store path (namespace) for an f5WafTls store of "tls-namespace1" will be the same as one labeled "namespace1".
 
-
-### F5 WAF TLS Discovery Job
-TODO Global Store Type Section is an optional section. If this section doesn't seem necessary on initial glance, please delete it. Refer to the docs on [Confluence](https://keyfactor.atlassian.net/wiki/x/SAAyHg) for more info
-
-
-TODO Discovery Job Configuration is an optional section. If this section doesn't seem necessary on initial glance, please delete it. Refer to the docs on [Confluence](https://keyfactor.atlassian.net/wiki/x/SAAyHg) for more info
 
 
 
