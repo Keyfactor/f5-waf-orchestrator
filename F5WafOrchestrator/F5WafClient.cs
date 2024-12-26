@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -24,8 +28,7 @@ using Keyfactor.Orchestrators.Extensions;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Pkcs;
 using System.Net;
-using Org.BouncyCastle.Asn1.Ocsp;
-using System.Xml.Linq;
+using System.Net.Http;
 
 namespace Keyfactor.Extensions.Orchestrator.F5WafOrchestrator.Client;
 
