@@ -28,7 +28,7 @@ In Keyfactor Command, navigate to Certificate Stores from the Locations Menu and
 | Schedule | Enter the schedule for when you want the job to run   |
 | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'.                                                 |
 | Server Username | This is not used but required in the UI.  Enter any value. |
-| Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings.  Please see [Requirements](#requirements) for more details on creating this token.  |
+| Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings.  Please see Requirements & Prerequisites for more information on creating this token.  |
 | Directories to Search | Not used for this integration.  Leave Blank.  |
 | Directories to ignore | Not used for this integration.  Leave Blank.  |
 | Extensions | Not used for this integration.  Leave Blank.  |
