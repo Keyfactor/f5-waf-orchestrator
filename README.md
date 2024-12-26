@@ -147,7 +147,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
     | Name | Display Name | Description | Type | Default Value/Options | Required |
     | ---- | ------------ | ---- | --------------------- | -------- | ----------- |
     | ServerUsername | Server Username | Not used, but a value is required.  Enter anything into this field. | Secret |  | 🔲 Unchecked |
-    | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token. | Secret |  | 🔲 Unchecked |
+    | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). | Secret |  | 🔲 Unchecked |
 
     The Custom Fields tab should look like this:
 
@@ -211,7 +211,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
     | Name | Display Name | Description | Type | Default Value/Options | Required |
     | ---- | ------------ | ---- | --------------------- | -------- | ----------- |
     | ServerUsername | Server Username | Not used, but a value is required.  Enter anything into this field. | Secret |  | 🔲 Unchecked |
-    | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token. | Secret |  | 🔲 Unchecked |
+    | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). | Secret |  | 🔲 Unchecked |
 
     The Custom Fields tab should look like this:
 
@@ -294,7 +294,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafTls` certificates. Specifically, one with the `f5WafTls` capability. |
         | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
 
 
         
@@ -321,7 +321,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafTls` certificates. Specifically, one with the `f5WafTls` capability. |
         | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
 
 
         
@@ -360,7 +360,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafCa` certificates. Specifically, one with the `f5WafCa` capability. |
         | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
 
 
         
@@ -370,7 +370,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         If a PAM provider was installed _on the Universal Orchestrator_ in the [Installation](#Installation) section, the following parameters can be configured for retrieval _on the Universal Orchestrator_.
         | Attribute | Description |
         | --------- | ----------- |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
 
 
         Please refer to the **Universal Orchestrator (remote)** usage section ([PAM providers on the Keyfactor Integration Catalog](https://keyfactor.github.io/integrations-catalog/content/pam)) for your selected PAM provider for instructions on how to load attributes orchestrator-side.
@@ -401,7 +401,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafCa` certificates. Specifically, one with the `f5WafCa` capability. |
         | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
 
 
         
@@ -411,7 +411,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         If a PAM provider was installed _on the Universal Orchestrator_ in the [Installation](#Installation) section, the following parameters can be configured for retrieval _on the Universal Orchestrator_.
         | Attribute | Description |
         | --------- | ----------- |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](https://github.com/Keyfactor/f5-waf-orchestrator#creating-an-f5-waf-api-token) for more details on creating this token. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
 
 
         > Any secret can be rendered by a PAM provider _installed on the Keyfactor Command server_. The above parameters are specific to attributes that can be fetched by an installed PAM provider running on the Universal Orchestrator server itself. 
