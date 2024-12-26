@@ -147,7 +147,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
     | Name | Display Name | Description | Type | Default Value/Options | Required |
     | ---- | ------------ | ---- | --------------------- | -------- | ----------- |
     | ServerUsername | Server Username | Not used, but a value is required.  Enter anything into this field. | Secret |  | 🔲 Unchecked |
-    | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). | Secret |  | 🔲 Unchecked |
+    | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review Requirements & Prerequisites for more information on creating this API token. | Secret |  | 🔲 Unchecked |
 
     The Custom Fields tab should look like this:
 
@@ -211,7 +211,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
     | Name | Display Name | Description | Type | Default Value/Options | Required |
     | ---- | ------------ | ---- | --------------------- | -------- | ----------- |
     | ServerUsername | Server Username | Not used, but a value is required.  Enter anything into this field. | Secret |  | 🔲 Unchecked |
-    | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). | Secret |  | 🔲 Unchecked |
+    | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review Requirements & Prerequisites for more information on creating this API token. | Secret |  | 🔲 Unchecked |
 
     The Custom Fields tab should look like this:
 
@@ -294,7 +294,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafTls` certificates. Specifically, one with the `f5WafTls` capability. |
         | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review Requirements & Prerequisites for more information on creating this API token. |
 
 
         
@@ -321,7 +321,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafTls` certificates. Specifically, one with the `f5WafTls` capability. |
         | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review Requirements & Prerequisites for more information on creating this API token. |
 
 
         
@@ -360,7 +360,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafCa` certificates. Specifically, one with the `f5WafCa` capability. |
         | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review Requirements & Prerequisites for more information on creating this API token. |
 
 
         
@@ -370,7 +370,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         If a PAM provider was installed _on the Universal Orchestrator_ in the [Installation](#Installation) section, the following parameters can be configured for retrieval _on the Universal Orchestrator_.
         | Attribute | Description |
         | --------- | ----------- |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review Requirements & Prerequisites for more information on creating this API token. |
 
 
         Please refer to the **Universal Orchestrator (remote)** usage section ([PAM providers on the Keyfactor Integration Catalog](https://keyfactor.github.io/integrations-catalog/content/pam)) for your selected PAM provider for instructions on how to load attributes orchestrator-side.
@@ -401,7 +401,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafCa` certificates. Specifically, one with the `f5WafCa` capability. |
         | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review Requirements & Prerequisites for more information on creating this API token. |
 
 
         
@@ -411,7 +411,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         If a PAM provider was installed _on the Universal Orchestrator_ in the [Installation](#Installation) section, the following parameters can be configured for retrieval _on the Universal Orchestrator_.
         | Attribute | Description |
         | --------- | ----------- |
-        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review Requirements & Prerequisites for more information on creating this API token. |
 
 
         > Any secret can be rendered by a PAM provider _installed on the Keyfactor Command server_. The above parameters are specific to attributes that can be fetched by an installed PAM provider running on the Universal Orchestrator server itself. 
@@ -442,7 +442,7 @@ In Keyfactor Command, navigate to Certificate Stores from the Locations Menu and
 | Schedule | Enter the schedule for when you want the job to run   |
 | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'.                                                 |
 | Server Username | This is not used but required in the UI.  Enter any value. |
-| Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings.  Please see [Requirements](#requirements) for more details on creating this token.  |
+| Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings.  Please see Requirements & Prerequisites for more information on creating this token.  |
 | Directories to Search | Not used for this integration.  Leave Blank.  |
 | Directories to ignore | Not used for this integration.  Leave Blank.  |
 | Extensions | Not used for this integration.  Leave Blank.  |
