@@ -1,108 +1,44 @@
+<h1 align="center" style="border-bottom: none">
+    F5 WAF Universal Orchestrator Extension
+</h1>
 
-# F5 WAF
-
-The F5 WAF Orchestrator is an extension to the Keyfactor Universal Orchestrator. It Integrates with Multi-Cloud App Connect, which is F5 Distributed Cloud's service for connecting apps across clouds and within on premise installationss using load balancers. The purpose of the F5 WAF orchestrator is to manage the TLS and CA Root certificates. The TLS certificates may be bound to load balancers.  The orchestrator facilitates the inventory, addition, renewal, and removal of these certificates as well as the discovery of namespaces (certificate stores) within the F5 Multi-Cloud App Connect instance.
-
-#### Integration status: Production - Ready for use in production environments.
-
-## About the Keyfactor Universal Orchestrator Extension
-
-This repository contains a Universal Orchestrator Extension which is a plugin to the Keyfactor Universal Orchestrator. Within the Keyfactor Platform, Orchestrators are used to manage “certificate stores” &mdash; collections of certificates and roots of trust that are found within and used by various applications.
-
-The Universal Orchestrator is part of the Keyfactor software distribution and is available via the Keyfactor customer portal. For general instructions on installing Extensions, see the “Keyfactor Command Orchestrator Installation and Configuration Guide” section of the Keyfactor documentation. For configuration details of this specific Extension see below in this readme.
-
-The Universal Orchestrator is the successor to the Windows Orchestrator. This Orchestrator Extension plugin only works with the Universal Orchestrator and does not work with the Windows Orchestrator.
-
-## Support for F5 WAF
-
-F5 WAF is supported by Keyfactor for Keyfactor customers. If you have a support issue, please open a support ticket via the Keyfactor Support Portal at https://support.keyfactor.com
-
-###### To report a problem or suggest a new feature, use the **[Issues](../../issues)** tab. If you want to contribute actual bug fixes or proposed enhancements, use the **[Pull requests](../../pulls)** tab.
-
----
-
-
----
-
-
-
-## Keyfactor Version Supported
-
-The minimum version of the Keyfactor Universal Orchestrator Framework needed to run this version of the extension is 10.4.1
-## Platform Specific Notes
-
-The Keyfactor Universal Orchestrator may be installed on either Windows or Linux based platforms. The certificate operations supported by a capability may vary based what platform the capability is installed on. The table below indicates what capabilities are supported based on which platform the encompassing Universal Orchestrator is running.
-| Operation | Win | Linux |
-|-----|-----|------|
-|Supports Management Add|&check; |&check; |
-|Supports Management Remove|&check; |&check; |
-|Supports Create Store|  |  |
-|Supports Discovery|&check; |&check; |
-|Supports Reenrollment|  |  |
-|Supports Inventory|&check; |&check; |
-
-
-## PAM Integration
-
-This orchestrator extension has the ability to connect to a variety of supported PAM providers to allow for the retrieval of various client hosted secrets right from the orchestrator server itself.  This eliminates the need to set up the PAM integration on Keyfactor Command which may be in an environment that the client does not want to have access to their PAM provider.
-
-The secrets that this orchestrator extension supports for use with a PAM Provider are:
-
-|Name|Description|
-|----|-----------|
-|ServerUsername|The user id that will be used to authenticate to the F5 WAF API endpoints|
-|ServerPassword|The API token that will be used to authenticate to the F5 WAF API endpoints|
-  
-
-It is not necessary to use a PAM Provider for all of the secrets available above. If a PAM Provider should not be used, simply enter in the actual value to be used, as normal.
-
-If a PAM Provider will be used for one of the fields above, start by referencing the [Keyfactor Integration Catalog](https://keyfactor.github.io/integrations-catalog/content/pam). The GitHub repo for the PAM Provider to be used contains important information such as the format of the `json` needed. What follows is an example but does not reflect the `json` values for all PAM Providers as they have different "instance" and "initialization" parameter names and values.
-
-<details><summary>General PAM Provider Configuration</summary>
-<p>
-
-
-
-### Example PAM Provider Setup
-
-To use a PAM Provider to resolve a field, in this example the __Server Password__ will be resolved by the `Hashicorp-Vault` provider, first install the PAM Provider extension from the [Keyfactor Integration Catalog](https://keyfactor.github.io/integrations-catalog/content/pam) on the Universal Orchestrator.
-
-Next, complete configuration of the PAM Provider on the UO by editing the `manifest.json` of the __PAM Provider__ (e.g. located at extensions/Hashicorp-Vault/manifest.json). The "initialization" parameters need to be entered here:
-
-~~~ json
-  "Keyfactor:PAMProviders:Hashicorp-Vault:InitializationInfo": {
-    "Host": "http://127.0.0.1:8200",
-    "Path": "v1/secret/data",
-    "Token": "xxxxxx"
-  }
-~~~
-
-After these values are entered, the Orchestrator needs to be restarted to pick up the configuration. Now the PAM Provider can be used on other Orchestrator Extensions.
-
-### Use the PAM Provider
-With the PAM Provider configured as an extenion on the UO, a `json` object can be passed instead of an actual value to resolve the field with a PAM Provider. Consult the [Keyfactor Integration Catalog](https://keyfactor.github.io/integrations-catalog/content/pam) for the specific format of the `json` object.
-
-To have the __Server Password__ field resolved by the `Hashicorp-Vault` provider, the corresponding `json` object from the `Hashicorp-Vault` extension needs to be copied and filed in with the correct information:
-
-~~~ json
-{"Secret":"my-kv-secret","Key":"myServerPassword"}
-~~~
-
-This text would be entered in as the value for the __Server Password__, instead of entering in the actual password. The Orchestrator will attempt to use the PAM Provider to retrieve the __Server Password__. If PAM should not be used, just directly enter in the value for the field.
+<p align="center">
+  <!-- Badges -->
+<img src="https://img.shields.io/badge/integration_status-production-3D1973?style=flat-square" alt="Integration Status: production" />
+<a href="https://github.com/Keyfactor/f5-waf-orchestrator/releases"><img src="https://img.shields.io/github/v/release/Keyfactor/f5-waf-orchestrator?style=flat-square" alt="Release" /></a>
+<img src="https://img.shields.io/github/issues/Keyfactor/f5-waf-orchestrator?style=flat-square" alt="Issues" />
+<img src="https://img.shields.io/github/downloads/Keyfactor/f5-waf-orchestrator/total?style=flat-square&label=downloads&color=28B905" alt="GitHub Downloads (all assets, all releases)" />
 </p>
-</details> 
 
-
-
-
----
-
+<p align="center">
+  <!-- TOC -->
+  <a href="#support">
+    <b>Support</b>
+  </a>
+  ·
+  <a href="#installation">
+    <b>Installation</b>
+  </a>
+  ·
+  <a href="#license">
+    <b>License</b>
+  </a>
+  ·
+  <a href="https://github.com/orgs/Keyfactor/repositories?q=orchestrator">
+    <b>Related Integrations</b>
+  </a>
+</p>
 
 ## Overview
-The F5 WAF Orchestrator extension remotely manages TLS and CA Root certificates uploaded to F5 Distributed Multi-Cloud App Connect, which is the F5 platform that manages WAF services. Certificates bound to Http Load Balancers within Multi-Cloud App Connect can be renewed/replaced, but they cannot be removed.  Certificate store types f5WafTls and f5WafCa are used to manage stores containing TLS and CA Root certificates, respectively.
 
-<details>
-<summary>f5WafTls</summary>
+The F5 WAF Orchestrator extension remotely manages TLS and CA Root certificates uploaded to F5 Distributed Multi-Cloud App Connect, which is the F5 platform that manages WAF services. Certificates bound to Http Load Balancers within Multi-Cloud App Connect can be renewed/replaced, but they cannot be removed. Certificate store types f5WafTls and f5WafCa are used to manage stores containing TLS and CA Root certificates, respectively.
+
+The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types. Depending on your use case, you may elect to use one, or both of these Certificate Store Types. Descriptions of each are provided below.
+
+<details><summary>F5 WAF TLS (f5WafTls)</summary>
+
+
+### f5WafTls
 
 The f5WafTls certificate store type is used to manage F5 Distributed Multi-Cloud App Connect TLS certificates.
 
@@ -111,11 +47,12 @@ Use cases supported:
 2. Inventory of a TLS store.  All TLS certificates, bound or unbound, within a namespace will be returned to Keyfactor Command.
 3. Management-Add.  Add a new certificate or renew an existing one.  Renew will work for both bound and unbound certificates.  All existing binding will remain in place, bound to the same alias with the newly replaced/renewed certificate.
 4. Management-Delete.  Remove an existing certificate.  Will only work for unbound certificates.
-
 </details>
 
-<details>
-<summary>f5WafCa</summary>
+<details><summary>F5 WAF CA (f5WafCa)</summary>
+
+
+### f5WafCa
 
 The f5WafCa certificate store type is used to manage F5 Distributed Multi-Cloud App Connect CA Root certificates.
 
@@ -124,117 +61,376 @@ Use cases supported:
 2. Inventory of a TLS store.  All CA Root certificates within a namespace will be returned to Keyfactor Command.
 3. Management-Add.  Add a new certificate or renew an existing one.
 4. Management-Delete.  Remove an existing certificate.  Please note, for CA Root certicates, deleting an existing certificate will replace ALL instances of the same certificate and not only the one represented by the intended alias.  This is an F5 WAF feature that the integration has no control over.
-
 </details>
 
 
-## F5 WAF Orchestrator Extension Installation
+## Compatibility
 
-1. Refer to the [Creating Certificate Store Types](#creating-certificate-store-types) section to create the certificate store types you wish to manage.
-2. Stop the Keyfactor Universal Orchestrator Service on the server you plan to install this extension to run on.
-3. In the Keyfactor Orchestrator installation folder (by convention usually C:\Program Files\Keyfactor\Keyfactor Orchestrator for a Windows install or /opt/keyfactor/orchestrator/ for a Linux install), find the "Extensions" folder. Underneath that, create a new folder named "F5Waf". You may choose to use a different name if you wish.
-4. Download the latest version of the F5 WAF orchestrator extension from [GitHub](https://github.com/Keyfactor/f5-waf-orchestrator).  Click on the "Latest" release link on the right hand side of the main page and download the first zip file.
-5. Copy the contents of the download installation zip file to the folder created in step 3.
-6. (Optional) If you decide to create one or more certificate store types with short names different than the suggested values, edit the manifest.json file in the folder you created in step 3, and modify each "ShortName" in each "Certstores.{ShortName}.{Operation}" line with the ShortName you used to create the respective certificate store type.
-7. Start the Keyfactor Universal Orchestrator Service.
+This integration is compatible with Keyfactor Universal Orchestrator version 10.4.1 and later.
 
+## Support
+The F5 WAF Universal Orchestrator extension is supported by Keyfactor for Keyfactor customers. If you have a support issue, please open a support ticket with your Keyfactor representative. If you have a support issue, please open a support ticket via the Keyfactor Support Portal at https://support.keyfactor.com. 
+ 
+> To report a problem or suggest a new feature, use the **[Issues](../../issues)** tab. If you want to contribute actual bug fixes or proposed enhancements, use the **[Pull requests](../../pulls)** tab.
 
-## Creating Certificate Store Types
+## Requirements & Prerequisites
 
-Below are the two certificate store types that the F5 WAF Orchestator Extension manages.  To create a new Certificate Store Type in Keyfactor Command, first click on settings (the gear icon on the top right) => Certificate Store Types => Add.  Next, follow the instructions under each store type you wish to set up.
-
-<details>  
-<summary>f5WafTls - TLS certificates in a namespace</summary>
-
-- <i>Basic Tab:</i>
-
-  - **Name** – Required. The display name you wish to use for the new Certificate Store Type.
-  - **Short Name** – Required. Suggested value - **f5WafTls**.  If you choose to use a different value you must make the corresponding modification to the manifest.json file.  See [F5 WAF Orchestrator Extension Installation](#f5-waf-orchestrator-extension-installation), step 6 above.
-  - **Custom Capability** - Unchecked
-  - **Supported Job Types** - Inventory, Add, Remove, and Discovery should all be checked.
-  - **Needs Server** - Checked
-  - **Blueprint Allowed** - Checked if you wish to make use of blueprinting.  Please refer to the Keyfactor Command Reference Guide for more details on this feature.
-  - **Uses PowerShell** - Unchecked
-  - **Requires Store Password** - Unchecked
-  - **Supports Entry Password** - Unchecked  
-
-- <i>Advanced Tab:</i>
-
-  - **Store Path Type** - Freeform
-  - **Supports Custom Alias** - Required.
-  - **Private Key Handling** - Required.  
-  - **PFX Password Style** - Default  
-
-- <i>Custom Fields Tab:</i>
-
-  - no additional custom fields  
-
-- <i>Entry Parameters Tab:</i>
-
-  - no additional entry parameters  
-
-</details>  
-
-<details>  
-<summary>f5WafCa - CA Root certificates in a namespace</summary>
-
-- <i>Basic Tab:</i>
-
-  - **Name** – Required. The display name you wish to use for the new Certificate Store Type.
-  - **Short Name** – Required. Suggested value - **f5WafCa**.  If you choose to use a different value you must make the corresponding modification to the manifest.json file.  See [F5 WAF Orchestrator Extension Installation](#f5-waf-orchestrator-extension-installation), step 6 above.
-  - **Custom Capability** - Unchecked
-  - **Supported Job Types** - Inventory, Add, Remove, and Discovery should all be checked.
-  - **Needs Server** - Checked
-  - **Blueprint Allowed** - Checked if you wish to make use of blueprinting.  Please refer to the Keyfactor Command Reference Guide for more details on this feature.
-  - **Uses PowerShell** - Unchecked
-  - **Requires Store Password** - Unchecked
-  - **Supports Entry Password** - Unchecked  
-
-- <i>Advanced Tab:</i>
-
-  - **Store Path Type** - Freeform
-  - **Supports Custom Alias** - Required.
-  - **Private Key Handling** - Forbidden.  
-  - **PFX Password Style** - Default  
-
-- <i>Custom Fields Tab:</i>
-
-  - no additional custom fields  
-
-- <i>Entry Parameters Tab:</i>
-
-  - no additional entry parameters  
-
-</details>  
+Before installing the F5 WAF Universal Orchestrator extension, we recommend that you install [kfutil](https://github.com/Keyfactor/kfutil). Kfutil is a command-line tool that simplifies the process of creating store types, installing extensions, and instantiating certificate stores in Keyfactor Command.
 
 
-## Creating Certificate Stores and Scheduling Discovery Jobs
+F5 Multi-Cloud App Connect uses API tokens to authenticate when calling APIs.  API Tokens can be created through the F5 Distributed Cloud Console.  Once logged in, select Multi-Cloud App Connect from the options under "Common services".  Next, select Account Services from the pull down at the top right of the screen, and select "Account Settings".  From there, click on "Credentials" on the left nav and "Add Credentials" on the subsequent screen.  In the form shown, select "API Token" from the Credential Type dropdown, and enter the name of the credential and the expiration date.  Please note that credentials can only be created for up to 90 day periods of time.  After 90 days, a new API token will need to be generated and replaced in your F5 WAF certificate store(s).  Clicking Generate will then show the value of the newly created API Token.  Copy this and save to a safe place, as this will be the value you will enter in the Server Password field when setting up your certificate store.  If you forget or lose this token value, there is no way to access it again in the F5 Distributed Cloud portal.  You will need to create a new API Token.
 
-When creating new certificate stores or scheduling discovery jobs in Keyfactor Command, there are a few fields that are important to highlight here:
+![](Images/image1.gif)
+![](Images/image2.gif)
+![](Images/image3.gif)
+![](Images/image4.gif)
+![](Images/image5.gif)
+![](Images/image6.gif)
 
-<details>
-<summary>Certificate Stores</summary>
 
-The following table describes the required and optional fields for the `f5WafTls` and `f5WafCa` certificate store types when creating a certificate store.
+## Create Certificate Store Types
 
-In Keyfactor Command, navigate to Certificate Stores from the Locations Menu. Click the Add button to create a new Certificate Store.
+To use the F5 WAF Universal Orchestrator extension, you **must** create the Certificate Store Types required for your usecase. This only needs to happen _once_ per Keyfactor Command instance.
 
-| Attribute | Description                                                                                                                                    |
-| --------- |------------------------------------------------------------------------------------------------------------------------------------------------|
-| Category | Select either f5WafTls or f5WafCa depending on whether you want to manage TLS certificates or Root CA certificates.                                        |
-| Container | Optional container to associate certificate store with.                                                                                        |
-| Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io').                                                 |
-| Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage.                                                          |
-| Orchestrator | Select an approved orchestrator capable of managing F5 WAF certificates. Specifically, one with the f5WafTls and f5WafCa capabilities.         |
-| Server Username | The username used to log in to the F5 Distributed Cloud instance (typically an email). |
-| Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings.  Please see [Creating an F5 WAF API Token](#creating-an-f5-waf-api-token) for more details on creating this token.  |
-| Use SSL | Not used for this integration, so either setting is fine.                |
+The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types. Depending on your use case, you may elect to use one, or both of these Certificate Store Types.
+
+<details><summary>F5 WAF TLS (f5WafTls)</summary>
+
+
+* **Create f5WafTls using kfutil**:
+
+    ```shell
+    # F5 WAF TLS
+    kfutil store-types create f5WafTls
+    ```
+
+* **Create f5WafTls manually in the Command UI**:
+    <details><summary>Create f5WafTls manually in the Command UI</summary>
+
+    Create a store type called `f5WafTls` with the attributes in the tables below:
+
+    #### Basic Tab
+    | Attribute | Value | Description |
+    | --------- | ----- | ----- |
+    | Name | F5 WAF TLS | Display name for the store type (may be customized) |
+    | Short Name | f5WafTls | Short display name for the store type |
+    | Capability | f5WafTls | Store type name orchestrator will register with. Check the box to allow entry of value |
+    | Supports Add | ✅ Checked | Check the box. Indicates that the Store Type supports Management Add |
+    | Supports Remove | ✅ Checked | Check the box. Indicates that the Store Type supports Management Remove |
+    | Supports Discovery | ✅ Checked | Check the box. Indicates that the Store Type supports Discovery |
+    | Supports Reenrollment | 🔲 Unchecked |  Indicates that the Store Type supports Reenrollment |
+    | Supports Create | 🔲 Unchecked |  Indicates that the Store Type supports store creation |
+    | Needs Server | ✅ Checked | Determines if a target server name is required when creating store |
+    | Blueprint Allowed | ✅ Checked | Determines if store type may be included in an Orchestrator blueprint |
+    | Uses PowerShell | 🔲 Unchecked | Determines if underlying implementation is PowerShell |
+    | Requires Store Password | 🔲 Unchecked | Enables users to optionally specify a store password when defining a Certificate Store. |
+    | Supports Entry Password | 🔲 Unchecked | Determines if an individual entry within a store can have a password. |
+
+    The Basic tab should look like this:
+
+    ![f5WafTls Basic Tab](docsource/images/f5WafTls-basic-store-type-dialog.png)
+
+    #### Advanced Tab
+    | Attribute | Value | Description |
+    | --------- | ----- | ----- |
+    | Supports Custom Alias | Required | Determines if an individual entry within a store can have a custom Alias. |
+    | Private Key Handling | Required | This determines if Keyfactor can send the private key associated with a certificate to the store. Required because IIS certificates without private keys would be invalid. |
+    | PFX Password Style | Default | 'Default' - PFX password is randomly generated, 'Custom' - PFX password may be specified when the enrollment job is created (Requires the Allow Custom Password application setting to be enabled.) |
+
+    The Advanced tab should look like this:
+
+    ![f5WafTls Advanced Tab](docsource/images/f5WafTls-advanced-store-type-dialog.png)
+
+    #### Custom Fields Tab
+    Custom fields operate at the certificate store level and are used to control how the orchestrator connects to the remote target server containing the certificate store to be managed. The following custom fields should be added to the store type:
+
+    | Name | Display Name | Description | Type | Default Value/Options | Required |
+    | ---- | ------------ | ---- | --------------------- | -------- | ----------- |
+    | ServerUsername | Server Username | Not used, but a value is required.  Enter anything into this field. | Secret |  | 🔲 Unchecked |
+    | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). | Secret |  | 🔲 Unchecked |
+
+    The Custom Fields tab should look like this:
+
+    ![f5WafTls Custom Fields Tab](docsource/images/f5WafTls-custom-fields-store-type-dialog.png)
+
+
+
+    </details>
+</details>
+
+<details><summary>F5 WAF CA (f5WafCa)</summary>
+
+
+* **Create f5WafCa using kfutil**:
+
+    ```shell
+    # F5 WAF CA
+    kfutil store-types create f5WafCa
+    ```
+
+* **Create f5WafCa manually in the Command UI**:
+    <details><summary>Create f5WafCa manually in the Command UI</summary>
+
+    Create a store type called `f5WafCa` with the attributes in the tables below:
+
+    #### Basic Tab
+    | Attribute | Value | Description |
+    | --------- | ----- | ----- |
+    | Name | F5 WAF CA | Display name for the store type (may be customized) |
+    | Short Name | f5WafCa | Short display name for the store type |
+    | Capability | f5WafCa | Store type name orchestrator will register with. Check the box to allow entry of value |
+    | Supports Add | ✅ Checked | Check the box. Indicates that the Store Type supports Management Add |
+    | Supports Remove | ✅ Checked | Check the box. Indicates that the Store Type supports Management Remove |
+    | Supports Discovery | ✅ Checked | Check the box. Indicates that the Store Type supports Discovery |
+    | Supports Reenrollment | 🔲 Unchecked |  Indicates that the Store Type supports Reenrollment |
+    | Supports Create | 🔲 Unchecked |  Indicates that the Store Type supports store creation |
+    | Needs Server | ✅ Checked | Determines if a target server name is required when creating store |
+    | Blueprint Allowed | ✅ Checked | Determines if store type may be included in an Orchestrator blueprint |
+    | Uses PowerShell | 🔲 Unchecked | Determines if underlying implementation is PowerShell |
+    | Requires Store Password | 🔲 Unchecked | Enables users to optionally specify a store password when defining a Certificate Store. |
+    | Supports Entry Password | 🔲 Unchecked | Determines if an individual entry within a store can have a password. |
+
+    The Basic tab should look like this:
+
+    ![f5WafCa Basic Tab](docsource/images/f5WafCa-basic-store-type-dialog.png)
+
+    #### Advanced Tab
+    | Attribute | Value | Description |
+    | --------- | ----- | ----- |
+    | Supports Custom Alias | Required | Determines if an individual entry within a store can have a custom Alias. |
+    | Private Key Handling | Forbidden | This determines if Keyfactor can send the private key associated with a certificate to the store. Required because IIS certificates without private keys would be invalid. |
+    | PFX Password Style | Default | 'Default' - PFX password is randomly generated, 'Custom' - PFX password may be specified when the enrollment job is created (Requires the Allow Custom Password application setting to be enabled.) |
+
+    The Advanced tab should look like this:
+
+    ![f5WafCa Advanced Tab](docsource/images/f5WafCa-advanced-store-type-dialog.png)
+
+    #### Custom Fields Tab
+    Custom fields operate at the certificate store level and are used to control how the orchestrator connects to the remote target server containing the certificate store to be managed. The following custom fields should be added to the store type:
+
+    | Name | Display Name | Description | Type | Default Value/Options | Required |
+    | ---- | ------------ | ---- | --------------------- | -------- | ----------- |
+    | ServerUsername | Server Username | Not used, but a value is required.  Enter anything into this field. | Secret |  | 🔲 Unchecked |
+    | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). | Secret |  | 🔲 Unchecked |
+
+    The Custom Fields tab should look like this:
+
+    ![f5WafCa Custom Fields Tab](docsource/images/f5WafCa-custom-fields-store-type-dialog.png)
+
+
+
+    </details>
+</details>
+
+
+## Installation
+
+1. **Download the latest F5 WAF Universal Orchestrator extension from GitHub.** 
+
+    Navigate to the [F5 WAF Universal Orchestrator extension GitHub version page](https://github.com/Keyfactor/f5-waf-orchestrator/releases/latest). Refer to the compatibility matrix below to determine whether the `net6.0` or `net8.0` asset should be downloaded. Then, click the corresponding asset to download the zip archive.
+    | Universal Orchestrator Version | Latest .NET version installed on the Universal Orchestrator server | `rollForward` condition in `Orchestrator.runtimeconfig.json` | `f5-waf-orchestrator` .NET version to download |
+    | --------- | ----------- | ----------- | ----------- |
+    | Older than `11.0.0` | | | `net6.0` |
+    | Between `11.0.0` and `11.5.1` (inclusive) | `net6.0` | | `net6.0` | 
+    | Between `11.0.0` and `11.5.1` (inclusive) | `net8.0` | `Disable` | `net6.0` | 
+    | Between `11.0.0` and `11.5.1` (inclusive) | `net8.0` | `LatestMajor` | `net8.0` | 
+    | `11.6` _and_ newer | `net8.0` | | `net8.0` |
+
+    Unzip the archive containing extension assemblies to a known location.
+
+    > **Note** If you don't see an asset with a corresponding .NET version, you should always assume that it was compiled for `net6.0`.
+
+2. **Locate the Universal Orchestrator extensions directory.**
+
+    * **Default on Windows** - `C:\Program Files\Keyfactor\Keyfactor Orchestrator\extensions`
+    * **Default on Linux** - `/opt/keyfactor/orchestrator/extensions`
+    
+3. **Create a new directory for the F5 WAF Universal Orchestrator extension inside the extensions directory.**
+        
+    Create a new directory called `f5-waf-orchestrator`.
+    > The directory name does not need to match any names used elsewhere; it just has to be unique within the extensions directory.
+
+4. **Copy the contents of the downloaded and unzipped assemblies from __step 2__ to the `f5-waf-orchestrator` directory.**
+
+5. **Restart the Universal Orchestrator service.**
+
+    Refer to [Starting/Restarting the Universal Orchestrator service](https://software.keyfactor.com/Core-OnPrem/Current/Content/InstallingAgents/NetCoreOrchestrator/StarttheService.htm).
+
+
+6. **(optional) PAM Integration** 
+
+    The F5 WAF Universal Orchestrator extension is compatible with all supported Keyfactor PAM extensions to resolve PAM-eligible secrets. PAM extensions running on Universal Orchestrators enable secure retrieval of secrets from a connected PAM provider.
+
+    To configure a PAM provider, [reference the Keyfactor Integration Catalog](https://keyfactor.github.io/integrations-catalog/content/pam) to select an extension, and follow the associated instructions to install it on the Universal Orchestrator (remote).
+
+
+> The above installation steps can be supplimented by the [official Command documentation](https://software.keyfactor.com/Core-OnPrem/Current/Content/InstallingAgents/NetCoreOrchestrator/CustomExtensions.htm?Highlight=extensions).
+
+
+
+## Defining Certificate Stores
+
+The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types, each of which implements different functionality. Refer to the individual instructions below for each Certificate Store Type that you deemed necessary for your use case from the installation section.
+
+<details><summary>F5 WAF TLS (f5WafTls)</summary>
+
+
+* **Manually with the Command UI**
+
+    <details><summary>Create Certificate Stores manually in the UI</summary>
+
+    1. **Navigate to the _Certificate Stores_ page in Keyfactor Command.**
+
+        Log into Keyfactor Command, toggle the _Locations_ dropdown, and click _Certificate Stores_.
+
+    2. **Add a Certificate Store.**
+
+        Click the Add button to add a new Certificate Store. Use the table below to populate the **Attributes** in the **Add** form.
+        | Attribute | Description |
+        | --------- | ----------- |
+        | Category | Select "F5 WAF TLS" or the customized certificate store name from the previous step. |
+        | Container | Optional container to associate certificate store with. |
+        | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'). |
+        | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
+        | Orchestrator | Select an approved orchestrator capable of managing `f5WafTls` certificates. Specifically, one with the `f5WafTls` capability. |
+        | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+
+
+        
+
+    </details>
+
+* **Using kfutil**
+    
+    <details><summary>Create Certificate Stores with kfutil</summary>
+    
+    1. **Generate a CSV template for the f5WafTls certificate store**
+
+        ```shell
+        kfutil stores import generate-template --store-type-name f5WafTls --outpath f5WafTls.csv
+        ```
+    2. **Populate the generated CSV file**
+
+        Open the CSV file, and reference the table below to populate parameters for each **Attribute**.
+        | Attribute | Description |
+        | --------- | ----------- |
+        | Category | Select "F5 WAF TLS" or the customized certificate store name from the previous step. |
+        | Container | Optional container to associate certificate store with. |
+        | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'). |
+        | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
+        | Orchestrator | Select an approved orchestrator capable of managing `f5WafTls` certificates. Specifically, one with the `f5WafTls` capability. |
+        | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+
+
+        
+
+    3. **Import the CSV file to create the certificate stores** 
+
+        ```shell
+        kfutil stores import csv --store-type-name f5WafTls --file f5WafTls.csv
+        ```
+    </details>
+
+> The content in this section can be supplimented by the [official Command documentation](https://software.keyfactor.com/Core-OnPrem/Current/Content/ReferenceGuide/Certificate%20Stores.htm?Highlight=certificate%20store).
+
 
 </details>
 
-<details>
-<summary>Discovery Jobs</summary>
+<details><summary>F5 WAF CA (f5WafCa)</summary>
 
+
+* **Manually with the Command UI**
+
+    <details><summary>Create Certificate Stores manually in the UI</summary>
+
+    1. **Navigate to the _Certificate Stores_ page in Keyfactor Command.**
+
+        Log into Keyfactor Command, toggle the _Locations_ dropdown, and click _Certificate Stores_.
+
+    2. **Add a Certificate Store.**
+
+        Click the Add button to add a new Certificate Store. Use the table below to populate the **Attributes** in the **Add** form.
+        | Attribute | Description |
+        | --------- | ----------- |
+        | Category | Select "F5 WAF CA" or the customized certificate store name from the previous step. |
+        | Container | Optional container to associate certificate store with. |
+        | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'). |
+        | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
+        | Orchestrator | Select an approved orchestrator capable of managing `f5WafCa` certificates. Specifically, one with the `f5WafCa` capability. |
+        | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+
+
+        
+
+        <details><summary>Attributes eligible for retrieval by a PAM Provider on the Universal Orchestrator</summary>
+
+        If a PAM provider was installed _on the Universal Orchestrator_ in the [Installation](#Installation) section, the following parameters can be configured for retrieval _on the Universal Orchestrator_.
+        | Attribute | Description |
+        | --------- | ----------- |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+
+
+        Please refer to the **Universal Orchestrator (remote)** usage section ([PAM providers on the Keyfactor Integration Catalog](https://keyfactor.github.io/integrations-catalog/content/pam)) for your selected PAM provider for instructions on how to load attributes orchestrator-side.
+
+        > Any secret can be rendered by a PAM provider _installed on the Keyfactor Command server_. The above parameters are specific to attributes that can be fetched by an installed PAM provider running on the Universal Orchestrator server itself. 
+        </details>
+        
+
+    </details>
+
+* **Using kfutil**
+    
+    <details><summary>Create Certificate Stores with kfutil</summary>
+    
+    1. **Generate a CSV template for the f5WafCa certificate store**
+
+        ```shell
+        kfutil stores import generate-template --store-type-name f5WafCa --outpath f5WafCa.csv
+        ```
+    2. **Populate the generated CSV file**
+
+        Open the CSV file, and reference the table below to populate parameters for each **Attribute**.
+        | Attribute | Description |
+        | --------- | ----------- |
+        | Category | Select "F5 WAF CA" or the customized certificate store name from the previous step. |
+        | Container | Optional container to associate certificate store with. |
+        | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'). |
+        | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
+        | Orchestrator | Select an approved orchestrator capable of managing `f5WafCa` certificates. Specifically, one with the `f5WafCa` capability. |
+        | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+
+
+        
+
+        <details><summary>Attributes eligible for retrieval by a PAM Provider on the Universal Orchestrator</summary>
+
+        If a PAM provider was installed _on the Universal Orchestrator_ in the [Installation](#Installation) section, the following parameters can be configured for retrieval _on the Universal Orchestrator_.
+        | Attribute | Description |
+        | --------- | ----------- |
+        | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please see [Creating an F5 WAF API Token](#requirements-&-prerequisites). |
+
+
+        > Any secret can be rendered by a PAM provider _installed on the Keyfactor Command server_. The above parameters are specific to attributes that can be fetched by an installed PAM provider running on the Universal Orchestrator server itself. 
+        </details>
+        
+
+    3. **Import the CSV file to create the certificate stores** 
+
+        ```shell
+        kfutil stores import csv --store-type-name f5WafCa --file f5WafCa.csv
+        ```
+    </details>
+
+> The content in this section can be supplimented by the [official Command documentation](https://software.keyfactor.com/Core-OnPrem/Current/Content/ReferenceGuide/Certificate%20Stores.htm?Highlight=certificate%20store).
+
+
+</details>
+
+## Discovering Certificate Stores with the Discovery Job
 The following table describes the required and optional fields to schedule a Discovery job for the `f5WafTls` and `f5WafCa` certificate store types.
 
 In Keyfactor Command, navigate to Certificate Stores from the Locations Menu and then click on the Discover tab.
@@ -245,8 +441,8 @@ In Keyfactor Command, navigate to Certificate Stores from the Locations Menu and
 | Orchestrator | Select an approved orchestrator capable of managing F5 WAF certificates. Specifically, one with the f5WafTls and f5WafCa capabilities.         |
 | Schedule | Enter the schedule for when you want the job to run   |
 | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'.                                                 |
-| Server Username | The username used to log in to the F5 Distributed Cloud instance (typically an email). |
-| Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings.  Please see [Creating an F5 WAF API Token](#creating-an-f5-waf-api-token) for more details on creating this token.  |
+| Server Username | This is not used but required in the UI.  Enter any value. |
+| Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings.  Please see [Requirements](#requirements) for more details on creating this token.  |
 | Directories to Search | Not used for this integration.  Leave Blank.  |
 | Directories to ignore | Not used for this integration.  Leave Blank.  |
 | Extensions | Not used for this integration.  Leave Blank.  |
@@ -257,21 +453,15 @@ In Keyfactor Command, navigate to Certificate Stores from the Locations Menu and
 
 Discovery jobs will return all known namespaces for this F5 WAF instance.  Please note that because Keyfactor Command has a restriction on multiple certificate stores having the same Client Machine and Store Path, certificate stores for f5WafTls will return stores with a "tls-" prefixed to the beginning of the store path (namespace); while f5WafCA stores will have "ca-" prefixed.  Any jobs that run for stores with these prefixes will have these prefixes removed before calling any F5 WAF APIs.  What this means is a store path (namespace) for an f5WafTls store of "tls-namespace1" will be the same as one labeled "namespace1".
 
-</details>
 
 
-## Creating an F5 WAF API Token
-
-In lieu of providing a server password when setting up an F5 WAF certificate store, F5 Multi-Cloud App Connect uses API tokens combined with the user id to authenticate when calling APIs.  API Tokens can be created through the F5 Distributed Cloud Console after logging in with the ID you wish to use for the Keyfactor certificate store.  Once logged in, select Multi-Cloud App Connect from the options under "Common services".  Next, select Account Services from the pull down at the top right of the screen, and select "Account Settings".  From there, click on "Credentials" on the left nav and "Add Credentials" on the subsequent screen.  In the form shown, select "API Token" from the Credential Type dropdown, and enter the name of the credential and the expiration date.  Please note that credentials can only be created for up to 90 day periods of time.  After 90 days, a new API token will need to be generated and replaced in your F5 WAF certificate store(s).  Clicking Generate will then show the value of the newly created API Token.  Copy this and save to a safe place, as this will be the value you will enter in the Server Password field when setting up your certificate store.  If you forget or lose this token value, there is no way to access it again in the F5 Distributed Cloud portal.  You will need to create a new API Token.
-
-![](Images/image1.gif)
-![](Images/image2.gif)
-![](Images/image3.gif)
-![](Images/image4.gif)
-![](Images/image5.gif)
-![](Images/image6.gif)
 
 
-When creating cert store type manually, that store property names and entry parameter names are case sensitive
 
+## License
 
+Apache License 2.0, see [LICENSE](LICENSE).
+
+## Related Integrations
+
+See all [Keyfactor Universal Orchestrator extensions](https://github.com/orgs/Keyfactor/repositories?q=orchestrator).
