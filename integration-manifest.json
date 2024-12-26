@@ -45,7 +45,7 @@
               "DefaultValue": "",
               "Required": false,
               "IsPAMEligible": false,
-              "Description": "The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review Requirements & Prerequisites for more information on creating this API token."
+              "Description": "The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review the Requirements & Prerequisites section in this README for more information on creating this API token."
             }
           ],
           "EntryParameters": [],
@@ -93,7 +93,7 @@
               "DefaultValue": "",
               "Required": false,
               "IsPAMEligible": true,
-              "Description": "The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review Requirements & Prerequisites for more information on creating this API token."
+              "Description": "The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review the Requirements & Prerequisites section in this README for more information on creating this API token."
             }
           ],
           "EntryParameters": [],
