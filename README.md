@@ -146,7 +146,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
 
     | Name | Display Name | Description | Type | Default Value/Options | Required |
     | ---- | ------------ | ---- | --------------------- | -------- | ----------- |
-    | ServerUsername | Server Username | Not used, but a value is required.  Enter anything into this field. | Secret |  | 🔲 Unchecked |
+    | ServerUsername | Server Username | Not used.  Set to No Value. | Secret |  | 🔲 Unchecked |
     | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review the Requirements & Prerequisites section in this README for more information on creating this API token. | Secret |  | 🔲 Unchecked |
 
     The Custom Fields tab should look like this:
@@ -210,7 +210,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
 
     | Name | Display Name | Description | Type | Default Value/Options | Required |
     | ---- | ------------ | ---- | --------------------- | -------- | ----------- |
-    | ServerUsername | Server Username | Not used, but a value is required.  Enter anything into this field. | Secret |  | 🔲 Unchecked |
+    | ServerUsername | Server Username | Not used.  Set to No Value. | Secret |  | 🔲 Unchecked |
     | ServerPassword | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review the Requirements & Prerequisites section in this README for more information on creating this API token. | Secret |  | 🔲 Unchecked |
 
     The Custom Fields tab should look like this:
@@ -293,7 +293,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'). |
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafTls` certificates. Specifically, one with the `f5WafTls` capability. |
-        | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
+        | ServerUsername | Not used.  Set to No Value. |
         | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review the Requirements & Prerequisites section in this README for more information on creating this API token. |
 
 
@@ -320,7 +320,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'). |
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafTls` certificates. Specifically, one with the `f5WafTls` capability. |
-        | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
+        | ServerUsername | Not used.  Set to No Value. |
         | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review the Requirements & Prerequisites section in this README for more information on creating this API token. |
 
 
@@ -359,7 +359,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'). |
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafCa` certificates. Specifically, one with the `f5WafCa` capability. |
-        | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
+        | ServerUsername | Not used.  Set to No Value. |
         | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review the Requirements & Prerequisites section in this README for more information on creating this API token. |
 
 
@@ -400,7 +400,7 @@ The F5 WAF Universal Orchestrator extension implements 2 Certificate Store Types
         | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'). |
         | Store Path | The Multi-Cloud App Connect namespace containing the certificates you wish to manage. |
         | Orchestrator | Select an approved orchestrator capable of managing `f5WafCa` certificates. Specifically, one with the `f5WafCa` capability. |
-        | ServerUsername | Not used, but a value is required.  Enter anything into this field. |
+        | ServerUsername | Not used.  Set to No Value. |
         | ServerPassword | The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review the Requirements & Prerequisites section in this README for more information on creating this API token. |
 
 
