@@ -35,7 +35,7 @@
               "DefaultValue": "",
               "Required": false,
               "IsPAMEligible": false,
-              "Description": "Not used, but a value is required.  Enter anything into this field."
+              "Description": "Not used.  Set to No Value."
             },
             {
               "Name": "ServerPassword",
@@ -83,7 +83,7 @@
               "DefaultValue": "",
               "Required": false,
               "IsPAMEligible": false,
-              "Description": "Not used, but a value is required.  Enter anything into this field."
+              "Description": "Not used.  Set to No Value."
             },
             {
               "Name": "ServerPassword",
