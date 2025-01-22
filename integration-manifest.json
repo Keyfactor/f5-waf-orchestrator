@@ -6,6 +6,7 @@
   "link_github": true,
   "update_catalog": true,
   "release_dir": "F5WafOrchestrator/bin/Release",
+  "release_project": "F5WafOrchestrator/F5WafOrchestrator.csproj",
   "support_level": "kf-supported",
   "description": "The F5 WAF Orchestrator is an extension to the Keyfactor Universal Orchestrator. It Integrates with Multi-Cloud App Connect, which is F5 Distributed Cloud's service for connecting apps across clouds and within on premise installationss using load balancers. The purpose of the F5 WAF orchestrator is to manage the TLS and CA Root certificates. The TLS certificates may be bound to load balancers.  The orchestrator facilitates the inventory, addition, renewal, and removal of these certificates as well as the discovery of namespaces (certificate stores) within the F5 Multi-Cloud App Connect instance.",
   "about": {
@@ -13,26 +14,8 @@
       "UOFramework": "10.4.1",
       "pam_support": true,
       "keyfactor_platform_version": "9.10",
-      "win": {
-        "supportsCreateStore": false,
-        "supportsDiscovery": true,
-        "supportsManagementAdd": true,
-        "supportsManagementRemove": true,
-        "supportsReenrollment": false,
-        "supportsInventory": true,
-        "platformSupport": "Unused"
-      },
-      "linux": {
-        "supportsCreateStore": false,
-        "supportsDiscovery": true,
-        "supportsManagementAdd": true,
-        "supportsManagementRemove": true,
-        "supportsReenrollment": false,
-        "supportsInventory": true,
-        "platformSupport": "Unused"
-      },
-      "store_types": {
-        "f5WafTls": {
+      "store_types": [
+        {
           "Name": "F5 WAF TLS",
           "ShortName": "f5WafTls",
           "Capability": "f5WafTls",
@@ -43,7 +26,28 @@
             "Enrollment": false,
             "Remove": true
           },
-          "Properties": [],
+          "Properties": [
+            {
+              "Name": "ServerUsername",
+              "DisplayName": "Server Username",
+              "Type": "Secret",
+              "DependsOn": "",
+              "DefaultValue": "",
+              "Required": false,
+              "IsPAMEligible": false,
+              "Description": "Not used.  Set to No Value."
+            },
+            {
+              "Name": "ServerPassword",
+              "DisplayName": "Server Password",
+              "Type": "Secret",
+              "DependsOn": "",
+              "DefaultValue": "",
+              "Required": false,
+              "IsPAMEligible": false,
+              "Description": "The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review the Requirements & Prerequisites section in this README for more information on creating this API token."
+            }
+          ],
           "EntryParameters": [],
           "PasswordOptions": {
             "EntrySupported": false,
@@ -55,9 +59,11 @@
           "ServerRequired": true,
           "PowerShell": false,
           "BlueprintAllowed": true,
-          "CustomAliasAllowed": "Required"
+          "CustomAliasAllowed": "Required",
+          "ClientMachineDescription": "The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io').",
+          "StorePathDescription": "The Multi-Cloud App Connect namespace containing the certificates you wish to manage."
         },
-        "f5WafCa": {
+        {
           "Name": "F5 WAF CA",
           "ShortName": "f5WafCa",
           "Capability": "f5WafCa",
@@ -68,7 +74,28 @@
             "Enrollment": false,
             "Remove": true
           },
-          "Properties": [],
+          "Properties": [
+            {
+              "Name": "ServerUsername",
+              "DisplayName": "Server Username",
+              "Type": "Secret",
+              "DependsOn": "",
+              "DefaultValue": "",
+              "Required": false,
+              "IsPAMEligible": false,
+              "Description": "Not used.  Set to No Value."
+            },
+            {
+              "Name": "ServerPassword",
+              "DisplayName": "Server Password",
+              "Type": "Secret",
+              "DependsOn": "",
+              "DefaultValue": "",
+              "Required": false,
+              "IsPAMEligible": true,
+              "Description": "The API Token configured in the F5 Distributed Cloud instance's Account Settings. Please review the Requirements & Prerequisites section in this README for more information on creating this API token."
+            }
+          ],
           "EntryParameters": [],
           "PasswordOptions": {
             "EntrySupported": false,
@@ -80,9 +107,11 @@
           "ServerRequired": true,
           "PowerShell": false,
           "BlueprintAllowed": true,
-          "CustomAliasAllowed": "Required"
+          "CustomAliasAllowed": "Required",
+          "ClientMachineDescription": "The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io').",
+          "StorePathDescription": "The Multi-Cloud App Connect namespace containing the certificates you wish to manage."
         }
-      }
+      ]
     }
   }
 }
