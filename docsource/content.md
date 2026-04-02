@@ -7,6 +7,8 @@ The F5 WAF Orchestrator extension remotely manages TLS and CA Root certificates 
 
 F5 Multi-Cloud App Connect uses API tokens to authenticate when calling APIs.  API Tokens can be created through the F5 Distributed Cloud Console.  Once logged in, select Multi-Cloud App Connect from the options under "Common services".  Next, select Account Services from the pull down at the top right of the screen, and select "Account Settings".  From there, click on "Credentials" on the left nav and "Add Credentials" on the subsequent screen.  In the form shown, select "API Token" from the Credential Type dropdown, and enter the name of the credential and the expiration date.  Please note that credentials can only be created for up to 90 day periods of time.  After 90 days, a new API token will need to be generated and replaced in your F5 WAF certificate store(s).  Clicking Generate will then show the value of the newly created API Token.  Copy this and save to a safe place, as this will be the value you will enter in the Server Password field when setting up your certificate store.  If you forget or lose this token value, there is no way to access it again in the F5 Distributed Cloud portal.  You will need to create a new API Token.
 
+The User ID the API Token is associated with MUST HAVE admin access to each namespace being managed as a certificate store.
+
 ![](Images/image1.gif)
 ![](Images/image2.gif)
 ![](Images/image3.gif)
@@ -29,7 +31,7 @@ In Keyfactor Command, navigate to Certificate Stores from the Locations Menu and
 | Client Machine | The URL for the F5 Distributed Cloud instance (typically ending in '.console.ves.volterra.io'.                                                 |
 | Server Username | This is not used but required in the UI.  Enter any value. |
 | Server Password | The API Token configured in the F5 Distributed Cloud instance's Account Settings.  Please see Requirements & Prerequisites for more information on creating this token.  |
-| Directories to Search | Not used for this integration.  Leave Blank.  |
+| Directories to Search | Not used for this integration, however this is a required field, so enter anything here.  |
 | Directories to ignore | Not used for this integration.  Leave Blank.  |
 | Extensions | Not used for this integration.  Leave Blank.  |
 | File name patterns to match | Not used for this integration.  Leave Blank.  |
